@@ -80,7 +80,7 @@ export async function comparePassword(password: string, hash: string): Promise<b
  * Generate JWT token
  */
 export function generateToken(payload: object, secret: string, expiresIn: string = '7d'): string {
-  return jwt.sign(payload, secret, { expiresIn });
+  return jwt.sign(payload, secret, { expiresIn } as jwt.SignOptions);
 }
 
 /**
