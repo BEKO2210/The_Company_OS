@@ -60,8 +60,19 @@ export function getDb(): Database.Database {
   return _db;
 }
 
-/** Convenience export - same as getDb() but for direct destructuring */
-export const db: Database.Database = getDb();
+/** Convenience export - Proxy that always resolves to current getDb() */
+export const db: Database.Database = new Proxy({} as Database.Database, {
+  get(_target, prop, receiver) {
+    const value = Reflect.get(getDb() as object, prop, receiver);
+    return typeof value === 'function' ? value.bind(getDb()) : value;
+  },
+  set(_target, prop, value) {
+    return Reflect.set(getDb() as object, prop, value);
+  },
+  has(_target, prop) {
+    return Reflect.has(getDb() as object, prop);
+  },
+});
 
 /** Re-export mutable reference that always calls getDb() */
 export function dbRef(): Database.Database {

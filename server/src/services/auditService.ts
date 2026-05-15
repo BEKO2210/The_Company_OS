@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { dbRef } from '../db/connection.js';
 import { generateAuditHash } from '../utils/crypto.js';
 import type { AuditLogEntry } from '../types/index.js';
@@ -28,7 +29,7 @@ export function createEntry(data: {
   const previousHash = getPreviousHash();
   const hash = generateAuditHash({ ...data, previous_hash: previousHash });
 
-  const id = data.id || `log-${Date.now()}`;
+  const id = data.id || `log-${Date.now()}-${randomUUID().slice(0, 8)}`;
   const timestamp = new Date().toISOString();
 
   dbRef().prepare(`
