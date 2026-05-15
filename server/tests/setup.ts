@@ -27,6 +27,8 @@ export { initSchema };
 // ─── Lifecycle: clear data between tests ───
 beforeEach(() => {
   const db = getDb();
+  // Disable FKs during wipe so delete order doesn't matter
+  db.pragma('foreign_keys = OFF');
   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all() as Array<{ name: string }>;
   for (const { name } of tables) {
     try {
@@ -35,6 +37,7 @@ beforeEach(() => {
       // ignore
     }
   }
+  db.pragma('foreign_keys = ON');
 });
 
 afterAll(() => {
