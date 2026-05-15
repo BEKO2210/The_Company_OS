@@ -74,7 +74,7 @@ export function initSchema(): void {
 
   const schemaPath = path.resolve(
     process.cwd(),
-    process.cwd().endsWith('/server') ? './src/db/schema.sql' : './server/src/db/schema.sql'
+    path.basename(process.cwd()) === 'server' ? './src/db/schema.sql' : './server/src/db/schema.sql'
   );
   const schema = fs.readFileSync(schemaPath, 'utf-8');
 
