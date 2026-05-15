@@ -1,0 +1,172 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 20% 4%;
+    --foreground: 240 10% 96%;
+    --card: 240 16% 7%;
+    --card-foreground: 240 10% 96%;
+    --popover: 240 14% 12%;
+    --popover-foreground: 240 10% 96%;
+    --primary: 169 70% 51%;
+    --primary-foreground: 240 20% 4%;
+    --secondary: 240 14% 12%;
+    --secondary-foreground: 240 10% 96%;
+    --muted: 240 14% 12%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 169 70% 51%;
+    --accent-foreground: 240 20% 4%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 12% 19%;
+    --input: 240 12% 19%;
+    --ring: 169 70% 51%;
+    --radius: 0.625rem;
+    --sidebar-background: 240 20% 4%;
+    --sidebar-foreground: 240 10% 96%;
+    --sidebar-primary: 169 70% 51%;
+    --sidebar-primary-foreground: 240 20% 4%;
+    --sidebar-accent: 240 14% 12%;
+    --sidebar-accent-foreground: 240 10% 96%;
+    --sidebar-border: 240 12% 19%;
+    --sidebar-ring: 169 70% 51%;
+  }
+
+  html {
+    background-color: #0A0A0F;
+    color: #F0F0F5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #0A0A0F;
+    color: #F0F0F5;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Scrollbar styling - dark, thin */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0A0A0F;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #3A3A4A;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555568;
+  }
+
+  /* Selection colors */
+  ::selection {
+    background-color: #2DD4BF33;
+    color: #F0F0F5;
+  }
+
+  ::-moz-selection {
+    background-color: #2DD4BF33;
+    color: #F0F0F5;
+  }
+
+  /* Focus styles */
+  *:focus-visible {
+    outline: 2px solid #2DD4BF;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Data card base style */
+  .data-card {
+    background: #111118;
+    border: 1px solid #2A2A36;
+    border-radius: 12px;
+    padding: 16px;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .data-card:hover {
+    border-color: #3A3A4A;
+  }
+
+  /* Status dot variants */
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-dot-green {
+    background: #10B981;
+    box-shadow: 0 0 6px #10B98133;
+  }
+
+  .status-dot-yellow {
+    background: #F59E0B;
+    box-shadow: 0 0 6px #F59E0B33;
+  }
+
+  .status-dot-red {
+    background: #EF4444;
+    box-shadow: 0 0 6px #EF4444;
+  }
+
+  .status-dot-gray {
+    background: #4B5563;
+  }
+
+  /* Badge variants */
+  .badge-green {
+    background: #10B98122;
+    color: #10B981;
+  }
+
+  .badge-yellow {
+    background: #F59E0B22;
+    color: #F59E0B;
+  }
+
+  .badge-red {
+    background: #EF444422;
+    color: #EF4444;
+  }
+
+  .badge-orange {
+    background: #F9731622;
+    color: #F97316;
+  }
+
+  .badge-gray {
+    background: #4B556322;
+    color: #9CA3AF;
+  }
+
+  .badge-blue {
+    background: #3B82F622;
+    color: #3B82F6;
+  }
+
+  .badge-teal {
+    background: #2DD4BF22;
+    color: #2DD4BF;
+  }
+}
+
+@layer utilities {
+  .font-mono-data {
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+  }
+}
