@@ -22,6 +22,7 @@ import { TenantManager } from "./tenantManager";
 // ───────────────────────────────────────────────
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       /** Resolved tenant for the current request */

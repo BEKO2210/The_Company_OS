@@ -3,8 +3,10 @@ import { verifyToken } from '../utils/crypto.js';
 import { db } from '../db/connection.js';
 import type { JWTPayload } from '../types/index.js';
 
-// Extend Express Request
+// Extend Express Request - namespace augmentation is the only supported
+// way for express's type extension, hence the eslint-disable.
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: JWTPayload;

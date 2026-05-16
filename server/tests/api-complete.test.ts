@@ -5,15 +5,16 @@
 
 import request from 'supertest';
 import { createApp } from '../src/app.js';
-import { testDb, initSchema } from './setup.js';
+import { testDb } from './setup.js';
 import { hashPasswordSync } from '../src/utils/crypto.js';
 
 const app = createApp();
 
 // ─── Test Helpers ───
-function getDb() {
+function _getDb() {
   return testDb;
 }
+type DbHandle = ReturnType<typeof _getDb>;
 
 async function loginAs(email: string, password: string): Promise<string> {
   const res = await request(app)
@@ -22,7 +23,7 @@ async function loginAs(email: string, password: string): Promise<string> {
   return res.body?.data?.token || '';
 }
 
-async function seedFullDb(db: ReturnType<typeof getDb>) {
+async function seedFullDb(db: DbHandle) {
   // Insert founder
   const founderHash = hashPasswordSync('TheCompany2025!', 4);
   db.prepare('INSERT INTO users (id, email, password_hash, name, role, is_active) VALUES (?, ?, ?, ?, ?, ?)')
@@ -100,12 +101,12 @@ async function seedFullDb(db: ReturnType<typeof getDb>) {
 
 describe('Complete API Test Suite', () => {
   let founderToken: string;
-  let adminToken: string;
+  let _adminToken: string;
 
   beforeEach(async () => {
     seedFullDb(testDb);
     founderToken = await loginAs('founder@thecompany.de', 'TheCompany2025!');
-    adminToken = await loginAs('admin@thecompany.de', 'admin123');
+    _adminToken = await loginAs('admin@thecompany.de', 'admin123');
   });
 
   // ═══════════════════════════════════════════

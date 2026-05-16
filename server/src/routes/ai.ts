@@ -169,14 +169,13 @@ router.get('/summary/daily', asyncHandler(async (_req: Request, res: Response) =
 
 router.get('/summary/weekly', asyncHandler(async (_req: Request, res: Response) => {
   const data = getCompanyData();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const report = generateWeeklySummary({
-    studios: data.productStudios as any,
-    agents: data.agents as any,
-    risks: data.risks as any,
-    workflows: data.workflows as any,
-    departments: data.departments as any,
-    financeEntries: data.financeEntries as any,
+    studios: data.productStudios,
+    agents: data.agents,
+    risks: data.risks,
+    workflows: data.workflows,
+    departments: data.departments,
+    financeEntries: data.financeEntries,
   });
 
   res.json({
@@ -268,14 +267,13 @@ router.get('/predict/overload', asyncHandler(async (_req: Request, res: Response
 
 router.get('/recommendations', asyncHandler(async (_req: Request, res: Response) => {
   const data = getCompanyData();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recommendations = getRecommendations({
-    agents: data.agents as any,
-    approvals: data.approvals as any,
-    financeEntries: data.financeEntries as any,
-    productStudios: data.productStudios as any,
-    risks: data.risks as any,
-    workflows: data.workflows as any,
+    agents: data.agents,
+    approvals: data.approvals,
+    financeEntries: data.financeEntries,
+    productStudios: data.productStudios,
+    risks: data.risks,
+    workflows: data.workflows,
   });
 
   res.json({

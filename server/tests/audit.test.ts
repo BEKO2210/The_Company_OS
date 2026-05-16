@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { createApp } from '../src/app.js';
 import { testDb } from './setup.js';
-import { generateToken, hashPassword, hashPasswordSync, generateAuditHash } from '../src/utils/crypto.js';
+import { generateToken, hashPasswordSync, generateAuditHash } from '../src/utils/crypto.js';
 import { createEntry, getEntries, verifyChain } from '../src/services/auditService.js';
 
 const app = createApp();

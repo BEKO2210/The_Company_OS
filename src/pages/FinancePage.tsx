@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Wallet, FileText, TrendingUp, AlertTriangle,
+  Wallet, FileText, AlertTriangle,
   Download, FileSpreadsheet, ChevronRight, AlertCircle,
   Send, CheckCircle, Clock, XCircle
 } from 'lucide-react';

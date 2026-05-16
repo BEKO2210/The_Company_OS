@@ -491,7 +491,6 @@ export default function AgentRegistryPage() {
   const quarantineCount = agents.filter((a) => a.status === 'quarantine').length;
   const humanCount = agents.filter((a) => a.autonomyLevel === 'human-only').length;
   const aiCount = agents.length - humanCount;
-  1;
   const cLevelCount = agents.filter((a) => roleTier(a.role) === 'C-Level').length;
 
   const hasFilters = search || statusFilter !== 'all' || deptFilter !== 'all' || riskFilter !== 'all';
