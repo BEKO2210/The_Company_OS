@@ -1,71 +1,67 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, Bot, ClipboardCheck, ShieldAlert, Zap, Wallet } from 'lucide-react';
+import { Bot, ClipboardCheck, ShieldAlert, Zap, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const kpiData = [
   {
     label: 'LIQUIDITAT',
-    value: 'EUR 12.450',
-    trend: '+3,2%',
-    trendUp: true,
-    subtitle: 'von EUR 20k Ziel',
+    value: 'EUR 0',
+    subtitle: 'Kein Ziel definiert',
     icon: Wallet,
-    borderColor: 'border-status-green',
-    barColor: 'bg-status-green',
-    barPercent: 62,
+    borderColor: 'border-border-subtle',
+    barColor: 'bg-text-muted',
+    barPercent: 0,
     valueColor: 'text-text-primary',
   },
   {
     label: 'AKTIVE PROJEKTE',
-    value: '5 / 12',
-    subtitle: '3 in QA, 2 in Entwicklung',
+    value: '0 / 0',
+    subtitle: 'Keine Projekte',
     icon: null,
-    borderColor: 'border-status-yellow',
-    barColor: 'bg-status-yellow',
-    barPercent: 42,
+    borderColor: 'border-border-subtle',
+    barColor: 'bg-text-muted',
+    barPercent: 0,
     valueColor: 'text-text-primary',
   },
   {
     label: 'OFFENE FREIGABEN',
-    value: '7',
-    subtitle: '2 kritisch, 3 hoch, 2 normal',
+    value: '0',
+    subtitle: 'Keine offenen Freigaben',
     icon: ClipboardCheck,
-    borderColor: 'border-status-red',
-    barColor: 'bg-status-red',
-    barPercent: 70,
-    valueColor: 'text-status-red',
-    pulse: true,
+    borderColor: 'border-border-subtle',
+    barColor: 'bg-text-muted',
+    barPercent: 0,
+    valueColor: 'text-text-primary',
   },
   {
     label: 'AKTIVE AGENTEN',
-    value: '18 / 22',
-    subtitle: '4 im Standby',
+    value: '0 / 0',
+    subtitle: 'Keine Agenten',
     icon: Bot,
-    borderColor: 'border-accent-teal',
-    barColor: 'bg-accent-teal',
-    barPercent: 82,
+    borderColor: 'border-border-subtle',
+    barColor: 'bg-text-muted',
+    barPercent: 0,
     valueColor: 'text-text-primary',
   },
   {
     label: 'OFFENE RISIKEN',
-    value: '12',
-    subtitle: '2 kritisch',
+    value: '0',
+    subtitle: 'Keine Risiken',
     icon: ShieldAlert,
-    borderColor: 'border-status-orange',
-    barColor: 'bg-status-orange',
-    barPercent: 38,
-    valueColor: 'text-status-orange',
+    borderColor: 'border-border-subtle',
+    barColor: 'bg-text-muted',
+    barPercent: 0,
+    valueColor: 'text-text-primary',
   },
   {
     label: 'AUTOMATISIERUNGSGRAD',
-    value: '73%',
-    subtitle: '+5% vs. letzte Woche',
-    subtitleColor: 'text-status-green',
+    value: '0%',
+    subtitle: 'Keine Daten',
     icon: Zap,
-    borderColor: 'border-accent-teal',
-    barColor: 'bg-accent-teal',
-    barPercent: 73,
-    valueColor: 'text-accent-teal',
+    borderColor: 'border-border-subtle',
+    barColor: 'bg-text-muted',
+    barPercent: 0,
+    valueColor: 'text-text-primary',
   },
 ];
 
@@ -85,41 +81,22 @@ export default function KPIBar() {
               index < kpiData.length - 1 && 'border-r border-border-subtle/50'
             )}
           >
-            {/* Label */}
             <div className="flex items-center gap-1.5 mb-0.5">
               <span className="text-[10px] font-medium text-text-tertiary tracking-wider uppercase">
                 {kpi.label}
               </span>
-              {kpi.pulse && (
-                <span className="w-2 h-2 rounded-full bg-status-red animate-pulse-red" />
-              )}
             </div>
 
-            {/* Value */}
             <div className="flex items-baseline gap-2">
               <span className={cn('text-base font-mono font-medium', kpi.valueColor)}>
                 {kpi.value}
               </span>
-              {kpi.trend && (
-                <span className={cn(
-                  'text-[10px] font-medium flex items-center gap-0.5',
-                  kpi.trendUp ? 'text-status-green' : 'text-status-red'
-                )}>
-                  <TrendingUp className="w-3 h-3" />
-                  {kpi.trend}
-                </span>
-              )}
             </div>
 
-            {/* Subtitle */}
-            <p className={cn(
-              'text-[10px] mt-0.5',
-              kpi.subtitleColor || 'text-text-tertiary'
-            )}>
+            <p className="text-[10px] mt-0.5 text-text-tertiary">
               {kpi.subtitle}
             </p>
 
-            {/* Mini bar */}
             <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-bg-tertiary">
               <motion.div
                 initial={{ width: 0 }}

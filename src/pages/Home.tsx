@@ -46,23 +46,10 @@ const staggerChild = {
 };
 
 // ─── Project Pipeline Data ───
-const projects = [
-  { name: 'Studio Cedar MVP', status: 'In Entwicklung', phase: '3/5', progress: 60, color: 'text-status-yellow', bg: 'bg-status-yellow', badge: 'badge-yellow', risk: 'Niedrig' },
-  { name: 'Studio Aurora Landingpage', status: 'In QA', phase: '4/5', progress: 80, color: 'text-accent-blue', bg: 'bg-accent-blue', badge: 'badge-blue', risk: 'Niedrig' },
-  { name: 'Studio Bridge Prototyp', status: 'Freigabe', phase: '5/5', progress: 95, color: 'text-accent-teal', bg: 'bg-accent-teal', badge: 'badge-teal', risk: 'Mittel' },
-  { name: 'Website Redesign', status: 'Planung', phase: '1/5', progress: 15, color: 'text-text-muted', bg: 'bg-text-muted', badge: 'badge-gray', risk: 'Niedrig' },
-  { name: 'Agent-Registry v2', status: 'In Entwicklung', phase: '2/5', progress: 40, color: 'text-status-yellow', bg: 'bg-status-yellow', badge: 'badge-yellow', risk: 'Niedrig' },
-];
+const projects: { name: string; status: string; phase: string; progress: number; color: string; bg: string; badge: string; risk: string }[] = [];
 
 // ─── Active Agents Data ───
-const activeAgents = [
-  { name: 'CEO-Agent', dept: 'Executive Council', status: 'active', action: 'Tagesbericht erstellt', time: '2m' },
-  { name: 'CTO-Agent', dept: 'Engineering', status: 'active', action: 'Code-Review abgeschlossen', time: '5m' },
-  { name: 'CFO-Agent', dept: 'Finance', status: 'active', action: 'Budget-Report generiert', time: '12m' },
-  { name: 'QA-Agent', dept: 'QA', status: 'working', action: 'Test-Suite lauft', time: '1m' },
-  { name: 'Marketing-Agent', dept: 'Marketing', status: 'active', action: 'Landingpage-Entwurf', time: '8m' },
-  { name: 'Sales-Agent', dept: 'Sales', status: 'waiting', action: 'Auf Lead-Antwort', time: '25m' },
-];
+const activeAgents: { name: string; dept: string; status: string; action: string; time: string }[] = [];
 
 const statusDotMap: Record<string, string> = {
   active: 'status-dot-green',
@@ -234,7 +221,7 @@ export default function Home() {
             onClick={() => navigate('/agents')}
             className="mt-4 text-xs text-accent-teal hover:text-accent-teal/80 transition-colors flex items-center gap-1"
           >
-            Alle 22 Agenten anzeigen <ChevronRight className="w-3 h-3" />
+            Alle Agenten anzeigen <ChevronRight className="w-3 h-3" />
           </button>
         </motion.div>
       </div>
@@ -302,7 +289,7 @@ export default function Home() {
             onClick={() => navigate('/approvals')}
             className="mt-4 text-xs text-accent-teal hover:text-accent-teal/80 transition-colors flex items-center gap-1"
           >
-            Alle 7 Freigaben anzeigen <ChevronRight className="w-3 h-3" />
+            Alle {approvals.length} Freigaben anzeigen <ChevronRight className="w-3 h-3" />
           </button>
         </motion.div>
 
@@ -318,13 +305,7 @@ export default function Home() {
           <p className="text-xs text-text-tertiary mb-4">Compliance-Warnungen und Risiken</p>
 
           <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-2">
-            {[
-              { category: 'Compliance', desc: 'GDPR-Prufung Studio Cedar uberfallig', severity: 'Kritisch', since: '2 Tg' },
-              { category: 'Sicherheit', desc: 'API-Key Rotation erforderlich', severity: 'Hoch', since: '1 Tg' },
-              { category: 'Finanzen', desc: 'Liquiditat unter 15k Schwelle', severity: 'Hoch', since: '5h' },
-              { category: 'Qualitat', desc: 'QA-Testabdeckung unter 80%', severity: 'Mittel', since: '3 Tg' },
-              { category: 'Rechtlich', desc: 'Vertragsklausel unvollstandig', severity: 'Niedrig', since: '1 W' },
-            ].map((risk, i) => {
+            {([] as { category: string; desc: string; severity: string; since: string }[]).map((risk, i) => {
               const catIcon = riskCategoryIcons[risk.category] || { icon: Shield, color: 'text-text-muted', bg: 'bg-bg-tertiary' };
               const IconComp = catIcon.icon;
               const sevStyle = severityBorderMap[risk.severity];
@@ -374,10 +355,8 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col items-center mt-4">
-            <CircularGauge value={73} size={130} />
-            <p className="text-xs text-status-green mt-2 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> +5% vs. letzte Woche
-            </p>
+            <CircularGauge value={0} size={130} />
+            <p className="text-xs text-text-tertiary mt-2">Keine Daten</p>
           </div>
 
           {/* Sparkline */}
@@ -395,11 +374,7 @@ export default function Home() {
 
           {/* Driver Bars */}
           <div className="mt-4 space-y-3">
-            {[
-              { label: 'Workflow-Automatisierung', value: 85, color: 'bg-status-green' },
-              { label: 'Approval-Automatisierung', value: 45, color: 'bg-status-yellow' },
-              { label: 'Berichtserstellung', value: 92, color: 'bg-status-green' },
-            ].map((driver) => (
+            {([] as { label: string; value: number; color: string }[]).map((driver) => (
               <div key={driver.label}>
                 <div className="flex justify-between text-[10px] mb-1">
                   <span className="text-text-secondary">{driver.label}</span>
@@ -502,8 +477,8 @@ export default function Home() {
 
           {/* Current Value */}
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="text-xl font-mono font-medium text-text-primary">EUR 12.450</span>
-            <span className="text-xs text-text-tertiary">10.03.2025</span>
+            <span className="text-xl font-mono font-medium text-text-primary">EUR 0</span>
+            <span className="text-xs text-text-tertiary">{new Date().toLocaleDateString('de-DE')}</span>
           </div>
 
           <div className="h-48">
@@ -561,7 +536,7 @@ export default function Home() {
             <Building2 className="w-4 h-4 text-accent-teal" />
             <h2 className="text-sm font-semibold text-text-primary tracking-wide">ABTEILUNGS-STATUS</h2>
           </div>
-          <p className="text-xs text-text-tertiary mb-4">Gesundheit aller 14 Abteilungen</p>
+          <p className="text-xs text-text-tertiary mb-4">Gesundheit aller {departments.length} Abteilungen</p>
 
           <motion.div
             variants={staggerContainer} initial="hidden" animate="visible"
