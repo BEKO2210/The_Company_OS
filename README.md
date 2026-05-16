@@ -39,6 +39,11 @@
 ### Adapter-Konfiguration im Wizard
 <img src="docs/screenshots/07-wizard-adapter.png" alt="Adapter Setup im Wizard" width="900" />
 
+<br />
+
+### KI-Suche mit lokalem Ollama (mistral-nemo:12b live)
+<img src="docs/screenshots/08-kisuche-ollama.png" alt="KI-Suche mit Ollama-Stream" width="900" />
+
 </div>
 
 ## Was ist implementiert?
@@ -90,6 +95,29 @@ Im **First-Run Setup-Wizard** koennen pro Adapter Provider + Credentials hinterl
 | FreelancerPlatformAdapter | 🔶 Mock | Upwork / Fiverr / Malt |
 
 Aktivieren = Switch + Provider waehlen + Felder ausfuellen + `Speichern & Anwenden` -> Server neu starten -> Adapter laeuft real.
+
+### Lokales LLM mit Ollama
+
+Der `ai`-Adapter (Default-Provider `ollama`) verbindet die KI-Suche und kuenftige Agenten mit einem lokalen Ollama-Daemon. Verifiziert mit `mistral-nemo:12b` auf einer RTX 3070 / 16GB RAM (~13 tok/s):
+
+```bash
+# 1. Ollama installieren -> https://ollama.com
+ollama pull mistral-nemo:12b      # ~7GB Q4_0
+ollama serve                       # default port 11434
+
+# 2. Server-ENV (oder im Wizard eintragen)
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=mistral-nemo:12b
+OLLAMA_NUM_CTX=4096                # default - bei wenig RAM auf 2048
+OLLAMA_NUM_PREDICT=512
+```
+
+Backend-Endpoints (unauth, nur lokal):
+- `GET  /api/ai/llm/health` &mdash; Reachability + installierte Modelle
+- `POST /api/ai/llm/chat`   &mdash; non-streaming JSON-Antwort
+- `POST /api/ai/llm/stream` &mdash; SSE-Stream (`event: delta` / `event: done` / `event: error`)
+
+Im UI: KI-Suche-Panel in der Sidebar zeigt das Modell-Badge (gruener Punkt = Ollama erreichbar) und faellt automatisch auf den lokalen Mock-NLQ-Parser zurueck wenn der Daemon nicht antwortet.
 
 ## Wie startet man es lokal?
 

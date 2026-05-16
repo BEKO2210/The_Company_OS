@@ -29,6 +29,7 @@ import killSwitchRoutes from './routes/killSwitch.js';
 import dashboardRoutes from './routes/dashboard.js';
 import aiRoutes from './routes/ai.js';
 import setupRoutes from './routes/setup.js';
+import llmRoutes from './routes/llm.js';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -91,6 +92,7 @@ export function createApp() {
   app.use('/api/settings', settingsRoutes);
   app.use('/api/kill-switch', killSwitchRoutes);
   app.use('/api/dashboard', dashboardRoutes);
+  app.use('/api/ai/llm', llmRoutes); // unauth - local LLM proxy, mount before /api/ai
   app.use('/api/ai', aiRoutes);
   app.use('/api/setup', setupRoutes);
 

@@ -34,6 +34,38 @@ export interface AdapterSpec {
 
 export const ADAPTER_SPECS: AdapterSpec[] = [
   {
+    key: 'ai',
+    title: 'AI / LLM',
+    description: 'Sprachmodell-Backend fuer KI-Suche, Empfehlungen, Reports.',
+    envPrefix: 'AI',
+    providers: [
+      {
+        id: 'ollama', label: 'Ollama (lokal)',
+        description: 'Lokales LLM via Ollama-Daemon (z.B. mistral-nemo:12b)',
+        fields: [
+          { key: 'url',   label: 'Ollama URL',  envKey: 'OLLAMA_URL',   placeholder: 'http://localhost:11434' },
+          { key: 'model', label: 'Modell-Name', envKey: 'OLLAMA_MODEL', placeholder: 'mistral-nemo:12b', required: true },
+        ],
+      },
+      {
+        id: 'openai', label: 'OpenAI',
+        description: 'OpenAI API (gpt-4o, gpt-4o-mini, ...)',
+        fields: [
+          { key: 'apiKey', label: 'API Key', envKey: 'OPENAI_API_KEY', type: 'password', required: true },
+          { key: 'model',  label: 'Modell',  envKey: 'OPENAI_MODEL',   placeholder: 'gpt-4o-mini' },
+        ],
+      },
+      {
+        id: 'anthropic', label: 'Anthropic Claude',
+        description: 'Claude via Anthropic API',
+        fields: [
+          { key: 'apiKey', label: 'API Key', envKey: 'ANTHROPIC_API_KEY', type: 'password', required: true },
+          { key: 'model',  label: 'Modell',  envKey: 'ANTHROPIC_MODEL',   placeholder: 'claude-sonnet-4-5' },
+        ],
+      },
+    ],
+  },
+  {
     key: 'email',
     title: 'Email',
     description: 'Outbound + Inbound Mail (Kundenkommunikation, Reports).',

@@ -8,6 +8,7 @@ const K_CONFIG = `${NS}.config`;
 // ─── Adapter & DB types ──────────────────────────────────────────────
 
 export type AdapterKey =
+  | 'ai'
   | 'email' | 'linkedin' | 'banking' | 'accounting'
   | 'github' | 'hosting' | 'calendar' | 'freelancer';
 
@@ -48,6 +49,14 @@ const EMPTY_ADAPTER = (provider: string): AdapterConfig => ({
 });
 
 export const DEFAULT_ADAPTERS: AdaptersConfig = {
+  ai: {
+    enabled: true,
+    provider: 'ollama',
+    credentials: {
+      url: 'http://localhost:11434',
+      model: 'mistral-nemo:12b',
+    },
+  },
   email:      EMPTY_ADAPTER('smtp'),
   linkedin:   EMPTY_ADAPTER('linkedin-api'),
   banking:    EMPTY_ADAPTER('plaid'),

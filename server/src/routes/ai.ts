@@ -284,4 +284,7 @@ router.get('/recommendations', asyncHandler(async (_req: Request, res: Response)
   });
 }));
 
+// NOTE: /llm/* routes moved to server/src/routes/llm.ts (unauth)
+// and mounted in app.ts at /api/ai/llm.
+
 export default router;
