@@ -1,3 +1,13 @@
+// Load env BEFORE any other server module imports so middleware that
+// reads process.env (e.g. middleware/auth.ts validating JWT_SECRET)
+// always sees the .env values, regardless of ESM import-hoist order.
+import dotenv from 'dotenv';
+if (process.env.NODE_ENV === 'test') {
+  dotenv.config({ path: '.env.test' });
+} else {
+  dotenv.config();
+}
+
 import { createApp } from './app.js';
 import { db } from './db/connection.js';
 import { seed } from './db/seed.js';
@@ -5,11 +15,9 @@ import { isDbEmpty } from './db/connection.js';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
-// ─── Start Server ───
 async function startServer() {
   const app = createApp();
 
-  // Seed database if empty
   if (isDbEmpty()) {
     console.log('[SERVER] Database is empty, running seed...');
     try {
@@ -26,7 +34,6 @@ async function startServer() {
     console.log(`[SERVER] Health check: http://localhost:${PORT}/health`);
   });
 
-  // Graceful shutdown
   process.on('SIGTERM', () => {
     console.log('[SERVER] SIGTERM received, shutting down gracefully...');
     server.close(() => {
@@ -48,7 +55,6 @@ async function startServer() {
   return server;
 }
 
-// Start if not in test mode
 if (process.env.NODE_ENV !== 'test') {
   startServer().catch(console.error);
 }

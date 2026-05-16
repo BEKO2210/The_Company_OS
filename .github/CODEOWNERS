@@ -1,0 +1,28 @@
+# Code owners for The Company OS.
+# Every PR touching these paths automatically requests a review.
+
+# Default fallback
+*                                @BEKO2210
+
+# Frontend
+/src/                            @BEKO2210
+/src/components/wizard/          @BEKO2210
+/src/components/ai/              @BEKO2210
+/src/lib/                        @BEKO2210
+/src/contexts/                   @BEKO2210
+
+# Backend
+/server/                         @BEKO2210
+/server/src/adapters/            @BEKO2210
+/server/src/routes/setup.ts      @BEKO2210
+/server/src/routes/llm.ts        @BEKO2210
+/server/src/middleware/          @BEKO2210
+/server/src/db/                  @BEKO2210
+/server/src/killSwitch/          @BEKO2210
+
+# Security-critical
+/SECURITY.md                     @BEKO2210
+/server/.env.example             @BEKO2210
+/.github/workflows/              @BEKO2210
+/.github/dependabot.yml          @BEKO2210
+/.github/CODEOWNERS              @BEKO2210

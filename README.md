@@ -1,7 +1,17 @@
 # The Company OS
 
-> **Status:** beta testing
-> **Letzte Aktualisierung:** 2026-05-15
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/BEKO2210/The_Company_OS?color=2DD4BF&style=flat-square" alt="License: MIT" /></a>
+  <a href="https://github.com/BEKO2210/The_Company_OS/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/BEKO2210/The_Company_OS/ci.yml?branch=main&label=CI&style=flat-square" alt="CI" /></a>
+  <a href="https://github.com/BEKO2210/The_Company_OS/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/BEKO2210/The_Company_OS/codeql.yml?branch=main&label=CodeQL&style=flat-square" alt="CodeQL" /></a>
+  <img src="https://img.shields.io/github/last-commit/BEKO2210/The_Company_OS?style=flat-square" alt="Last commit" />
+  <img src="https://img.shields.io/github/v/release/BEKO2210/The_Company_OS?display_name=tag&include_prereleases&sort=semver&style=flat-square" alt="Release" />
+  <img src="https://img.shields.io/badge/node-%E2%89%A520-3B82F6?style=flat-square&logo=node.js&logoColor=white" alt="Node 20+" />
+  <img src="https://img.shields.io/badge/typescript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict" />
+</p>
+
+> **Status:** Alpha (v0.1.0)
+> **Letzte Aktualisierung:** 2026-05-16
 
 ## Was ist das Projekt?
 
@@ -121,18 +131,42 @@ Im UI: KI-Suche-Panel in der Sidebar zeigt das Modell-Badge (gruener Punkt = Oll
 
 ## Wie startet man es lokal?
 
+**Voraussetzungen:** Node.js >=20 (siehe `.nvmrc`). Optional: laufender Ollama-Daemon fuer die KI-Suche.
+
 ```bash
-# 1. Repository oeffnen
-cd /mnt/agents/output/app
+# 1. Clone
+git clone https://github.com/BEKO2210/The_Company_OS.git
+cd The_Company_OS
 
-# 2. Abhaengigkeiten installieren
+# 2. Frontend
 npm install
+npm run dev          # http://localhost:5173 (Hot Reload)
+# oder Production:
+npm run build && npm run preview   # http://localhost:4173
+```
 
-# 3. Development Server starten
+In einem **zweiten Terminal** den Backend-Server starten:
+
+```bash
+cd server
+npm install
+npm run dev          # http://localhost:3001
+```
+
+`server/.env` wird automatisch gelesen — kein inline-Setzen von Variablen mehr noetig. Erste-Start-Wizard schreibt `.env` selbst.
+
+Falls du Env-Variablen manuell ueberschreiben willst, **PowerShell-Syntax** verwenden (nicht die Bash-Form `VAR=x cmd`):
+
+```powershell
+# PowerShell
+$env:OLLAMA_MODEL = "mistral-nemo:12b"
+$env:OLLAMA_URL   = "http://localhost:11434"
 npm run dev
+```
 
-# 4. Oder Production Build
-npm run build
+```bash
+# Bash / WSL / Git Bash
+OLLAMA_MODEL=mistral-nemo:12b OLLAMA_URL=http://localhost:11434 npm run dev
 ```
 
 ## Dateistruktur
@@ -231,12 +265,23 @@ Die vollstaendige Dokumentation befindet sich im `docs/`-Ordner:
 | Datenmodelle | 15 |
 | Mock-Datensaetze | 200+ |
 
+## Beitragen & Community
+
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) - Setup, Style, PR-Flow
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) - Verhaltensregeln
+- [`SECURITY.md`](SECURITY.md) - Vulnerability Reporting (privat)
+- [`CHANGELOG.md`](CHANGELOG.md) - Release Notes (Keep-a-Changelog Format)
+- Issue-Templates: `.github/ISSUE_TEMPLATE/`
+- Dependabot + CodeQL: `.github/dependabot.yml`, `.github/workflows/codeql.yml`
+
 ## Lizenz
 
-Proprietaer — The Company Internal
+[MIT License](LICENSE) - copyright (c) 2026 Belkis Aslani.
+
+<!-- Vite/React boilerplate notes intentionally removed; see https://vite.dev for upstream docs. -->
 
 
-# React + TypeScript + Vite
+# React + TypeScript + Vite (template notes archived below)
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

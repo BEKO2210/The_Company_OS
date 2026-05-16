@@ -9,11 +9,13 @@ import { authRateLimit } from '../middleware/rateLimit.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error('FATAL: JWT_SECRET environment variable is required');
-}
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+// Lazy: env may not be loaded when this module is imported.
+const getJwtSecret = (): string => {
+  const s = process.env.JWT_SECRET;
+  if (!s) throw new Error('FATAL: JWT_SECRET environment variable is required');
+  return s;
+};
+const getJwtExpiry = (): string => process.env.JWT_EXPIRES_IN || '7d';
 const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
 
 // POST /api/auth/login - with rate limiting to prevent brute force
@@ -52,8 +54,8 @@ router.post('/login', authRateLimit({ windowMs: 15 * 60 * 1000, maxRequests: 5 }
 
   const token = generateToken(
     { userId: user.id, email: user.email, role: user.role },
-    JWT_SECRET,
-    JWT_EXPIRES_IN
+    getJwtSecret(),
+    getJwtExpiry()
   );
 
   res.json({

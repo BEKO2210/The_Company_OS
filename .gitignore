@@ -1,13 +1,59 @@
-node_modules
-dist
-.DS_Store
+# ─── Dependencies & build artifacts ──────────────────────────────
+node_modules/
+dist/
+build/
+.cache/
+.parcel-cache/
+.next/
+out/
+
+# ─── Logs ────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ─── Env / secrets ───────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.bak
+.env.preserve
+.env.tmp
+*.pem
+*.key
+*.crt
+
+# ─── Databases ───────────────────────────────────────────────────
 *.db
 *.db-shm
 *.db-wal
-*.log
-.claude/
+*.sqlite
+*.sqlite3
 
-# Local screenshots from dev/audits (agent-browser)
+# ─── OS / editor cruft ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.recommended.json
+
+# ─── Tooling ─────────────────────────────────────────────────────
+.claude/
+.cursor/
+.tsbuildinfo
+*.tsbuildinfo
+coverage/
+.nyc_output/
+
+# ─── Local dev screenshots (agent-browser audits) ────────────────
+# Curated screenshots in docs/screenshots/ are tracked.
 empty-home.png
 check-*.png
 wizard-*.png

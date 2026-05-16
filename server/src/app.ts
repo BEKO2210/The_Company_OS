@@ -1,13 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-
-// Load environment variables
-if (process.env.NODE_ENV === 'test') {
-  dotenv.config({ path: '.env.test' });
-} else {
-  dotenv.config();
-}
+// Env vars are loaded in server.ts before this module is imported,
+// so process.env is ready by the time middleware reads it.
 
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { securityHeaders, sanitizeInput } from './middleware/security.js';

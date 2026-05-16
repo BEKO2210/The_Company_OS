@@ -1,223 +1,46 @@
-# Sicherheitskonzept — The Company OS
+# Security Policy
 
-## Grundprinzip: Secure by Default
+## Supported Versions
 
-Das System ist von Grund auf sicher konzipiert:
-- Kein Agent kann mehr als ihm explizit erlaubt ist
-- Im Zweifel: blockieren und eskalieren
-- Alle Aktionen sind protokolliert und nachvollziehbar
+| Version | Supported          |
+| ------- | ------------------ |
+| 0.1.x   | :white_check_mark: |
+| < 0.1   | :x:                |
 
-## RBAC (Role-Based Access Control)
+## Reporting a Vulnerability
 
-### Rollenhierarchie
+**Please do NOT file a public GitHub issue for a security vulnerability.**
 
-```
-Human CEO (Gruender)
-├── CEO-Agent
-│   ├── COO-Agent
-│   ├── CTO-Agent
-│   ├── CFO-Agent
-│   ├── CLO-Agent
-│   ├── CISO-Agent
-│   ├── CPO-Agent
-│   └── CHRO-Agent
-│       ├── Brand-Agent
-│       ├── Sales-Agent
-│       ├── Procurement-Agent
-│       ├── QA-Agent
-│       ├── Customer-Support-Agent
-│       ├── Field-Operations-Agent
-│       ├── Safety-Agent
-│       ├── Audit-Agent
-│       ├── Knowledge-Agent
-│       ├── Pricing-Agent
-│       ├── Doc-Agent
-│       ├── Marketing-Agent
-│       └── Analytics-Agent
-```
+Send a private report to **belkis.aslani@gmail.com** with:
 
-### Berechtigungsmatrix
+- A clear description of the issue and the impact (what an attacker can do)
+- Steps to reproduce (proof-of-concept, exact commit hash, environment)
+- Suggested mitigation if you have one
 
-| Rolle | Lesen | Schreiben | Tools | Admin |
-|-------|-------|-----------|-------|-------|
-| Human CEO | Alles | Alles | Alle | Ja |
-| CEO-Agent | Alles | Registry | Task Router, Workflow | Nein |
-| CFO-Agent | Finanzen | Entwuerfe | Budget, Kalkulation | Nein |
-| CLO-Agent | Recht | Checklisten | Vertragsvorlagen | Nein |
-| CISO-Agent | Sicherheit | RBAC-Vorschlaege | Secrets, Monitoring | Nein |
-| (weitere) | Scope | Scope | Scope | Nein |
+You should receive an acknowledgement within **72 hours**. We aim to ship a fix
+or a clearly communicated mitigation within **14 days** of confirmation for
+high-severity issues.
 
-### Least Privilege
+If the vulnerability concerns a third-party dependency, please also notify the
+upstream maintainers and reference the CVE if one exists.
 
-Jeder Agent hat das **minimale** Rechteprofil:
-- Standard-Budgetlimit: **0 EUR**
-- Kein Zugriff auf Produktivsysteme ohne Freigabe
-- Kein Zugriff auf Secrets im Klartext
-- Tools nur nach expliziter Genehmigung
+## Hardening already in place
 
-## Secrets Management
+- JWT auth with bcrypt(12) password hashes (`server/src/utils/crypto.ts`).
+- Per-endpoint RBAC + auth middleware (`server/src/middleware/{auth,rbac}.ts`).
+- Input sanitization + security headers (`server/src/middleware/security.ts`).
+- Rate limiting on auth endpoints (`server/src/middleware/rateLimit.ts`).
+- Append-only audit log with hash-chain entries.
+- Kill-switch (4 levels) gated behind explicit confirmation flows.
+- Atomic `.env` writer that backs up before overwriting and self-locks
+  after first run (`server/src/routes/setup.ts`).
+- All third-party adapters default to **mock mode** until credentials are
+  explicitly configured via the setup wizard or `server/.env`.
 
-### Regeln
-1. **NIE** in Prompts, Code oder Logs
-2. Nur als Referenzen (z.B. `secret://api-key`)
-3. Speicherung: Supabase Vault / Cloudflare Secrets
-4. Zugriff nur ueber vermittelte, geloggte Tool-Aufrufe
-5. Agenten sehen Secrets NIE im Klartext
-6. Rotation, Ablaufdaten, Least-Privilege
-7. CISO-Agent ueberwacht
+For the full security/architecture deep-dive see [`docs/SECURITY.md`](docs/SECURITY.md).
 
-### Secret-Typen
+## Out of scope
 
-| Typ | Speicherort | Zugriff |
-|-----|-------------|---------|
-| API-Keys | Supabase Vault | CTO-Agent (referenziert) |
-| Banking | Supabase Vault | CFO-Agent (referenziert) |
-| OAuth-Tokens | Cloudflare Secrets | CISO-Agent (referenziert) |
-| Zertifikate | Supabase Vault | CISO-Agent (referenziert) |
-
-## Kill Switch (Not-Aus)
-
-### 4-Stufen-System
-
-#### Level 1 — Circuit Breaker (automatisch, fein)
-- Ausloeser: Wiederholte Fehler, Timeouts, Risk-Limits
-- Wirkung: EINZELNE Agenten-Aktion gestoppt
-- Rest: Laeuft weiter
-- Wiederanlauf: Automatisch nach Cooldown
-
-#### Level 2 — Agent Quarantaene (gezielt)
-- Ausloeser: Anomalie, Safety-Veto-Haeufung, Fehlkonfiguration
-- Wirkung: EIN Agent auf `quarantaene` gesetzt
-- Agent kann nichts mehr ausfuehren
-- Reaktivierung: Nur durch Mensch oder Audit
-
-#### Level 3 — Workflow Stopp (bereichsweise)
-- Ausloeser: Gefaehrlicher Vorfall, Unit-Problem
-- Wirkung: GANZER Workflow oder Unit pausiert
-- Laufende Schritte eingefroren
-- Kein Datenverlust
-
-#### Level 4 — Globaler Not-Aus (grob)
-- Ausloeser: Kritischer Sicherheitsvorfall
-- Wirkung: ALLE Agenten-Aktivitaet eingefroren
-- Lesen + Dashboard bleiben verfuegbar
-- KEIN Tool-Aufruf mehr moeglich
-- Reaktivierung: Nur durch Gruender + Post-Mortem
-
-### Eigenschaften aller Stufen
-- **Fail-Closed**: Im Zweifel stoppen
-- **Geloggt**: Jede Ausloesung protokolliert
-- **Wiederanlauf**: Erfordert menschliche Freigabe (ab Level 2)
-- **Regelmaessiger Test**: Kill Switch wird getestet
-
-## Tool Permission System
-
-### Risikoklassen
-
-| Klasse | Farbe | Bedeutung |
-|--------|-------|-----------|
-| Gruen | 🟢 | Frei, nur Logging |
-| Gelb | 🟡 | Mit Limit/Logging |
-| Rot | 🔴 | Immer Human-Approval |
-
-### Tool-Beispiele
-
-| Tool | Risikoklasse | Limit |
-|------|-------------|-------|
-| E-Mail Senden | Gelb | Max 50/Tag, nur verifizierte Domains |
-| LinkedIn Post | Gelb | Plattformregeln |
-| Rechnung Erstellen | Gelb | Nur Entwurf |
-| Zahlung Ausloesen | **Rot** | **0 EUR — immer Human** |
-| Vertrag Unterschreiben | **Rot** | **Immer Human** |
-| Produktiv-Deploy | **Rot** | **Immer Human** |
-| Code in Staging | Gruen | Autonom |
-| Kalendereintrag | Gruen | Autonom |
-| CRM Update | Gruen | Autonom |
-
-## Incident Response
-
-### 5-Schritte-Prozess
-
-1. **Erkennen** — Safety/Audit/CISO oder Mensch
-2. **Klassifizieren** — Schweregrad 1-4
-3. **Eindaemmen** — Agent pausieren, Workflow stoppen, Quarantaene
-4. **Beheben** — Zustaendige Rolle + Mensch
-5. **Aufarbeiten** — Post-Mortem, Lerngedaechtnis, Regelanpassung
-
-### Schweregrade
-
-| Grad | Name | Reaktion |
-|------|------|----------|
-| 1 | Gering | Info, automatisch behoben |
-| 2 | Moderat | Agent benachrichtigt, Eskalation vorbereitet |
-| 3 | **Ernst** | **Sofortige Gruender-Eskalation** |
-| 4 | **Kritisch** | **Not-Aus moeglich, 72h DSGVO-Meldung** |
-
-## Red-Team Pruefungen
-
-### Was wird geprueft?
-- Kann ein Agent eine rote Linie umgehen?
-- Funktioniert Prompt Injection?
-- Lassen sich Approval-Gates umgehen?
-- Halten Budgetlimits?
-
-### Taktung
-- Phase 0: Monatlich (Gruender + Checkliste)
-- Phase 1+: Quartalsweise (extern)
-- Nach jeder groesseren OS-Aenderung
-
-## Verschluesselung
-
-| Datentyp | Methode |
-|----------|---------|
-| Secrets | AES-256-GCM (Supabase Vault) |
-| Datenbank | TLS 1.3 |
-| API-Kommunikation | TLS 1.3 |
-| Backups | AES-256 |
-
-## .env.example (keine echten Werte!)
-
-```env
-# SUPABASE
-SUPABASE_URL=your-project-url
-SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_KEY=your-service-key
-
-# CLOUDFLARE
-CF_ACCOUNT_ID=your-account-id
-CF_API_TOKEN=your-api-token
-
-# EXTERNAL SERVICES (keine echten Werte!)
-OPENAI_API_KEY=sk-xxxxxxxx
-GITHUB_TOKEN=ghp_xxxxxxxx
-LINKEDIN_CLIENT_ID=xxxxxxxx
-
-# SECURITY
-JWT_SECRET=your-jwt-secret
-ENCRYPTION_KEY=your-encryption-key
-
-# MONITORING
-SENTRY_DSN=https://xxxxx@xxxxx.sentry.io/xxxxx
-```
-
-## Sicherheits-Checkliste RUN-001
-
-- [x] RBAC-Struktur definiert
-- [x] Tool-Risikoklassen definiert
-- [x] Kill Switch (4 Stufen) implementiert
-- [x] Audit-Log (append-only)
-- [x] Red-Line-Gates modelliert
-- [x] Secrets-Management-Konzept
-- [x] .env.example (keine echten Werte)
-- [x] Incident-Response-Prozess
-- [x] Red-Team-Checkliste
-- [x] Keine echten externen Aktionen
-
-## Abweichungen vom Blueprint
-
-| Blueprint-Vorgabe | RUN-001 Umsetzung | Begruendung |
-|-------------------|-------------------|-------------|
-| Supabase Vault | Mock/Interface | Sandbox-Limit |
-| Cloudflare Workers | Nicht implementiert | Frontend-only |
-| R2 Export | Nicht implementiert | Frontend-only |
-| Row-Level Security | Mock-Ebene | Keine echte DB |
+- Issues that require physical access to the machine.
+- Findings against `MOCK_MODE=true` fake data (no real impact).
+- Reports generated solely by automated scanners without a working reproducer.

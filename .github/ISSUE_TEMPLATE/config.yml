@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: mailto:belkis.aslani@gmail.com
+    about: Do NOT open a public issue. Email belkis.aslani@gmail.com - see SECURITY.md.
+  - name: Question / discussion
+    url: https://github.com/BEKO2210/The_Company_OS/discussions
+    about: Open a Discussion for questions, ideas, or design feedback.

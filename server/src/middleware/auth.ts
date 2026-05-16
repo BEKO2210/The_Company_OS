@@ -12,9 +12,15 @@ declare global {
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET!;
-if (!JWT_SECRET) {
-  throw new Error('FATAL: JWT_SECRET environment variable is required');
+// Resolve JWT_SECRET lazily so this module can be imported BEFORE
+// dotenv.config() runs (e.g. via transitive ESM imports). Fail loud
+// the first time a token is actually verified if it's still missing.
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('FATAL: JWT_SECRET environment variable is required');
+  }
+  return secret;
 }
 
 /**
@@ -32,7 +38,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   const token = authHeader.substring(7);
 
   try {
-    const payload = verifyToken<JWTPayload & { iat?: number }>(token, JWT_SECRET);
+    const payload = verifyToken<JWTPayload & { iat?: number }>(token, getJwtSecret());
 
     // Reject tokens issued in the future (clock-skew / forgery defense, 60s tolerance)
     if (payload.iat && payload.iat > Math.floor(Date.now() / 1000) + 60) {
@@ -71,7 +77,7 @@ export function optionalAuth(req: Request, res: Response, next: NextFunction): v
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
     try {
-      const payload = verifyToken<JWTPayload>(token, JWT_SECRET);
+      const payload = verifyToken<JWTPayload>(token, getJwtSecret());
       req.user = payload;
     } catch {
       // ignore invalid token for optional auth
