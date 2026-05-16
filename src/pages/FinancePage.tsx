@@ -100,39 +100,15 @@ export default function FinancePage() {
   const openAmount = openInvoices.reduce((s, i) => s + i.amount, 0);
   const overdueCount = invoices.filter(i => i.status === 'overdue').length;
 
-  const donutData = useMemo(() => [
-    { name: 'Engineering', value: 3200, color: '#3B82F6' },
-    { name: 'Marketing', value: 1800, color: '#F43F5E' },
-    { name: 'Operations', value: 1200, color: '#2DD4BF' },
-    { name: 'QA', value: 800, color: '#84CC16' },
-    { name: 'Overhead', value: 1200, color: '#6B7280' },
-  ], []);
+  const donutData = useMemo(() => [] as { name: string; value: number; color: string }[], []);
 
-  const breakEvenTarget = 8000;
-  const currentMRR = 3200;
-  const breakEvenProgress = Math.min((currentMRR / breakEvenTarget) * 100, 100);
+  const breakEvenTarget = 0;
+  const currentMRR = 0;
+  const breakEvenProgress = breakEvenTarget > 0 ? Math.min((currentMRR / breakEvenTarget) * 100, 100) : 0;
 
-  const projectionData = useMemo(() => [
-    { month: 'Apr', projected: 3200 },
-    { month: 'Mai', projected: 4300 },
-    { month: 'Jun', projected: 5400 },
-    { month: 'Jul', projected: 6500 },
-    { month: 'Aug', projected: 7600 },
-    { month: 'Sep', projected: 8700 },
-    { month: 'Okt', projected: 9800 },
-    { month: 'Nov', projected: 10900 },
-    { month: 'Dez', projected: 12000 },
-  ], []);
+  const projectionData = useMemo(() => [] as { month: string; projected: number }[], []);
 
-  const costStructureData = [
-    { name: 'Hosting & Infra', amount: 520, pct: '6%' },
-    { name: 'Software & Tools', amount: 380, pct: '5%' },
-    { name: 'Freelancer', amount: 2400, pct: '29%' },
-    { name: 'Agent-Betrieb', amount: 1800, pct: '22%' },
-    { name: 'Marketing', amount: 1200, pct: '15%' },
-    { name: 'Overhead', amount: 1200, pct: '15%' },
-    { name: 'Rucklagen', amount: 700, pct: '9%' },
-  ];
+  const costStructureData: { name: string; amount: number; pct: string }[] = [];
 
   const filteredInvoices = invoiceFilter === 'all'
     ? invoices
@@ -179,13 +155,9 @@ export default function FinancePage() {
             <span className="badge-green text-[11px] font-medium px-2 py-0.5 rounded-full">OK</span>
           </div>
           <div className="font-mono-data text-2xl font-medium text-text-primary mb-1">
-            {eur(12450)}
+            {eur(0)}
           </div>
-          <div className="flex items-center gap-1 text-xs text-status-green mb-1">
-            <TrendingUp className="w-3 h-3" />
-            +{eur(320)} vs. gestern
-          </div>
-          <div className="text-[11px] text-text-tertiary">Min: {eur(5000)}</div>
+          <div className="text-[11px] text-text-tertiary">Keine Daten</div>
         </motion.div>
 
         {/* Monatsbudget */}
@@ -194,20 +166,12 @@ export default function FinancePage() {
             <span className="text-[11px] font-semibold tracking-wider text-text-tertiary uppercase">Monatsbudget</span>
           </div>
           <div className="font-mono-data text-lg font-medium text-text-primary mb-1">
-            {eur(8200)} / {eur(12000)}
+            {eur(0)} / {eur(0)}
           </div>
           <div className="h-1.5 bg-bg-tertiary rounded-full overflow-hidden mb-2">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '68%' }}
-              transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] }}
-              className="h-full bg-status-yellow rounded-full"
-            />
+            <div className="h-full w-0 bg-text-muted rounded-full" />
           </div>
-          <div className="flex items-center gap-1 text-xs text-status-yellow mb-1">
-            +{eur(1200)} verfugbar
-          </div>
-          <div className="text-[11px] text-text-tertiary">{eur(273)}/Tag Burn Rate</div>
+          <div className="text-[11px] text-text-tertiary">Kein Budget definiert</div>
         </motion.div>
 
         {/* Offene Rechnungen */}
@@ -222,10 +186,7 @@ export default function FinancePage() {
             {eur(openAmount)}
           </div>
           <div className="text-xs text-text-secondary mb-1">{openInvoices.length} Rechnungen</div>
-          <div className="flex items-center gap-1 text-xs text-status-green">
-            <TrendingUp className="w-3 h-3" />
-            +{eur(2400)} erwartet
-          </div>
+          <div className="text-[11px] text-text-tertiary">Keine erwarteten Eingange</div>
         </motion.div>
 
         {/* Break-Even */}
@@ -234,9 +195,9 @@ export default function FinancePage() {
             <span className="text-[11px] font-semibold tracking-wider text-text-tertiary uppercase">Break-Even</span>
           </div>
           <div className="font-mono-data text-lg font-medium text-text-primary mb-1">
-            {eur(8000)}/Monat
+            {eur(0)}/Monat
           </div>
-          <div className="text-xs text-text-secondary mb-1">{eur(3200)} MRR aktuell</div>
+          <div className="text-xs text-text-secondary mb-1">{eur(0)} MRR aktuell</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 h-1.5 bg-bg-tertiary rounded-full overflow-hidden">
               <motion.div
@@ -248,7 +209,7 @@ export default function FinancePage() {
             </div>
             <span className="text-[11px] text-text-tertiary">{breakEvenProgress.toFixed(0)}%</span>
           </div>
-          <div className="text-xs text-status-red mt-1">-{eur(4800)}</div>
+          <div className="text-xs text-text-tertiary mt-1">-{eur(0)}</div>
         </motion.div>
       </div>
 
@@ -346,7 +307,7 @@ export default function FinancePage() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-mono-data text-base font-medium text-text-primary">{eur(8200)}</span>
+                <span className="font-mono-data text-base font-medium text-text-primary">{eur(0)}</span>
               </div>
             </div>
           </div>
@@ -362,7 +323,7 @@ export default function FinancePage() {
                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.color }} />
                 <span className="text-xs text-text-secondary flex-1">{d.name}</span>
                 <span className="font-mono-data text-xs text-text-primary">{eur(d.value)}</span>
-                <span className="text-[11px] text-text-tertiary w-8 text-right">{((d.value / 8200) * 100).toFixed(0)}%</span>
+                <span className="text-[11px] text-text-tertiary w-8 text-right">0%</span>
               </motion.div>
             ))}
           </div>
@@ -473,7 +434,7 @@ export default function FinancePage() {
             </div>
             <div>
               <div className="text-[11px] text-text-tertiary uppercase mb-1">Gap</div>
-              <div className="font-mono-data text-xl font-medium text-status-red">-{eur(4800)}</div>
+              <div className="font-mono-data text-xl font-medium text-text-tertiary">{eur(0)}</div>
             </div>
           </div>
 
@@ -512,9 +473,9 @@ export default function FinancePage() {
             </ResponsiveContainer>
           </div>
           <div className="text-[11px] text-text-tertiary space-y-0.5">
-            <div>Monatliches Wachstum: +{eur(1100)}</div>
-            <div>Churn-Rate: 2%</div>
-            <div>Durchschnittlicher ACV: {eur(2800)}</div>
+            <div>Monatliches Wachstum: {eur(0)}</div>
+            <div>Churn-Rate: 0%</div>
+            <div>Durchschnittlicher ACV: {eur(0)}</div>
           </div>
         </motion.div>
 
@@ -546,8 +507,8 @@ export default function FinancePage() {
                 ))}
                 <tr className="bg-bg-tertiary/40">
                   <td className="py-2 px-2 text-xs font-semibold text-text-primary">Gesamt</td>
-                  <td className="py-2 px-2 text-xs font-mono-data font-semibold text-text-primary text-right">{eur(8200)}</td>
-                  <td className="py-2 px-2 text-xs font-semibold text-text-tertiary text-right">100%</td>
+                  <td className="py-2 px-2 text-xs font-mono-data font-semibold text-text-primary text-right">{eur(costStructureData.reduce((s, c) => s + c.amount, 0))}</td>
+                  <td className="py-2 px-2 text-xs font-semibold text-text-tertiary text-right">{costStructureData.length > 0 ? '100%' : '0%'}</td>
                 </tr>
               </tbody>
             </table>
@@ -556,14 +517,7 @@ export default function FinancePage() {
           {/* 6-month cost bar chart */}
           <div className="h-[140px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={[
-                { month: 'Jan', cost: 6800 },
-                { month: 'Feb', cost: 7200 },
-                { month: 'Mar', cost: 7500 },
-                { month: 'Apr', cost: 7800 },
-                { month: 'Mai', cost: 8200 },
-                { month: 'Jun', cost: 8600 },
-              ]} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+              <BarChart data={[] as { month: string; cost: number }[]} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1A1A24" vertical={false} />
                 <XAxis dataKey="month" tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
