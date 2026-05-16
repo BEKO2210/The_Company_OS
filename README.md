@@ -58,34 +58,46 @@
 
 ## Was ist implementiert?
 
-### Dashboard (13 Screens)
-| Screen | Status | Beschreibung |
-|--------|--------|-------------|
-| Company Overview | ✅ Vollstaendig | 6 KPIs, Projekt-Pipeline, Agenten-Status, Freigaben, Risiken, Automationsgrad |
-| Departments | ✅ Vollstaendig | 14 Abteilungen als Karten mit Status, Agenten, Aufgaben |
-| Agent Registry | ✅ Vollstaendig | 22 Agenten als Tabelle mit Filter, Detail-Drawer |
-| Business Units | ✅ Vollstaendig | 8 Units A-H mit KPIs, Risiken, Detail-Drawer |
-| Product Studios | ✅ Vollstaendig | 3 Studios (Cedar, Aurora, Bridge) mit Timeline, Budget |
-| Approval Queue | ✅ Vollstaendig | 7 Freigaben mit roten Linien, Aktion-Buttons |
-| Audit Log | ✅ Vollstaendig | 22 Eintraege, append-only, Filter, Hash-Referenzen |
-| Risk Center | ✅ Vollstaendig | 5x5 Risiko-Matrix, 32 Risiken, Incidents, Safety Vetos |
-| Finance | ✅ Vollstaendig | Liquiditaets-Trend, Budget-Donut, Rechnungen, Break-even |
-| Human Workforce | ✅ Vollstaendig | 12 Experten, Freelancer, Vendors mit Bewertungen |
-| Workflows | ✅ Vollstaendig | 18 Workflows mit Step-Tracker, Gates |
-| Settings | ✅ Vollstaendig | Model Policies, Tool Permissions, Budget Limits, RBAC |
-| Kill Switch | ✅ Vollstaendig | 4-Stufen-Not-Aus, Press-and-Hold Panic-Button |
+### Dashboard (13 Screens) - alle als **Empty Template** ausgeliefert
+
+Seit Commit `cb345b4` ist `src/data/mockData.ts` leer (`[]`). Jede Seite rendert eine saubere Empty-State, der **Setup-Wizard** fuellt sie:
+
+| Screen | Quelle der Daten | Beschreibung |
+|--------|------------------|--------------|
+| Company Overview | `CompanyContext` (Wizard) | 6 KPIs, Projekt-Pipeline, Agenten-Status, AI-Insights |
+| Departments | derived aus `config.departments` | Karten mit Status, Agenten, Aufgaben |
+| Agent Registry | derived aus `config.agents` | Tabelle mit Filter + Detail-Drawer |
+| Business Units | derived aus `config.businessUnit` | KPIs, Risiken, Detail-Drawer |
+| Product Studios | (noch leer / `[]`) | Empty-State + "Neues Studio" CTA |
+| Approval Queue | (noch leer / `[]`) | KPIs Total/RedLine/HighRisk/Approved alle 0 |
+| Audit Log | (noch leer / `[]`) | Append-only Ledger, Hash-Chain |
+| Risk Center | (noch leer / `[]`) | 5x5 Matrix, Gesamtscore 0/100 |
+| Finance | `config.budget` (Wizard) | Liquiditats-Ziel, Monatsbudget, Break-Even-Target |
+| Human Workforce | (noch leer / `[]`) | Freelancer/Vendors/Experten, alle 0 |
+| Workflows | (noch leer / `[]`) | Empty-State + "Neuer Workflow" |
+| Settings | `systemSettings` (leer) + Wizard-Reset-Button | Model Policies, Tool Permissions, RBAC |
+| Kill Switch | armed (Default) | 4-Stufen-Notabschaltung |
+
+### Setup-Wizard (10 Schritte)
+
+Willkommen → Firma & Founder → Abteilungen → Agenten → Business Unit → Budget → **Datenbank** (SQLite-Pfad) → **Adapter** (9 Integrationen, siehe unten) → Kill-Switch → **Fertig** (POST `/api/setup/save-env` → schreibt `server/.env` + lockt sich).
 
 ### Daten & Modelle
-- ✅ 15 TypeScript Interfaces (Agent, Department, BusinessUnit, ProductStudio, Approval, AuditLogEntry, Risk, Workflow, HumanExpert, FinanceEntry, Invoice, Budget, Incident, SystemSettings)
-- ✅ Vollstaendige Seed-Daten: 22 Agenten, 14 Departments, 8 Business Units, 3 Studios, 7+ Approvals, 32 Risiken, 18 Workflows, 12 Human Experts
+- 15 TypeScript Interfaces in `src/data/models.ts` (Agent, Department, BusinessUnit, ProductStudio, Approval, AuditLogEntry, Risk, Workflow, HumanExpert, FinanceEntry, Invoice, Budget, Incident, SystemSettings, WorkflowStep)
+- `src/lib/storage.ts` → typed `CompanyConfig` + localStorage Wrapper
+- `src/lib/companyAdapter.ts` → `deriveAgents` / `deriveDepartments` / `deriveBusinessUnits` / `deriveFinance`
+- `src/lib/envSerializer.ts` → `CompanyConfig` → `.env` body
+- `src/lib/adapterSpecs.ts` → Single source of truth fuer Wizard-UI **und** .env-Writer
 
 ### Technologie
-- ✅ Next.js-aquivalent: Vite + React 19 + TypeScript
-- ✅ Tailwind CSS v3.4.19 mit vollstaendigem Dark-Design-System
-- ✅ 40+ shadcn/ui Komponenten
-- ✅ Framer Motion Animationen
-- ✅ Recharts Datenvisualisierung
-- ✅ Responsive Design (Desktop/Tablet/Mobile)
+- Vite 7 + React 19 + TypeScript 5.9 (strict)
+- Tailwind CSS 3.4 mit eigenem Dark-Token-System (`tailwind.config.js`)
+- 50+ shadcn/ui Komponenten (Radix-basiert)
+- Framer Motion 12, Recharts 2.15, lucide-react
+- React Router 7 (HashRouter — `#/route`)
+- Express 4 + better-sqlite3 + zod + JWT + bcrypt (Backend)
+- Jest + supertest (server tests)
+- Ollama-Adapter mit Streaming SSE (`server/src/adapters/ollamaAdapter.ts`)
 
 ## Was ist Mock / Adapter?
 
@@ -168,6 +180,102 @@ npm run dev
 # Bash / WSL / Git Bash
 OLLAMA_MODEL=mistral-nemo:12b OLLAMA_URL=http://localhost:11434 npm run dev
 ```
+
+## Quickstart mit Ollama (Schritt-fuer-Schritt)
+
+Verifiziertes Setup: Windows 11, AMD 7 5800X, RTX 3070 8GB VRAM, 16GB RAM, `mistral-nemo:12b` → ~13 tok/s streaming durchs UI.
+
+**0. Ollama besorgen** (falls noch nicht da)
+
+   Download von <https://ollama.com> → Installer ausfuehren. Ollama laeuft danach als Background-Service auf Port `11434`.
+
+   ```powershell
+   # Modell ziehen (~7GB, einmalig)
+   ollama pull mistral-nemo:12b
+
+   # Test
+   ollama list
+   ```
+
+   Schwaechere Hardware: `qwen2.5-coder:7b` (~4.7GB) oder `qwen3:8b` sind deutlich schneller.
+
+**1. Repo klonen + Dependencies installieren**
+
+   ```powershell
+   git clone https://github.com/BEKO2210/The_Company_OS.git
+   cd The_Company_OS
+
+   # Frontend
+   npm install
+
+   # Backend (separates package)
+   cd server
+   npm install
+   cd ..
+   ```
+
+**2. Backend starten** (Terminal 1)
+
+   ```powershell
+   cd server
+   npm run dev
+   ```
+
+   Erwartete Ausgabe:
+   ```
+   [DB] Schema initialized
+   [SERVER] The Company OS API running on port 3001
+   [SERVER] Environment: development
+   [SERVER] Health check: http://localhost:3001/health
+   ```
+
+**3. Frontend starten** (Terminal 2)
+
+   ```powershell
+   # Vom Repo-Root
+   npm run dev
+   ```
+
+   Browser oeffnet sich auf <http://localhost:5173>. **Setup-Wizard erscheint automatisch** (10 Schritte).
+
+**4. Wizard durchklicken**
+
+   - **Welcome** → Weiter
+   - **Firma & Founder** → Firmennamen ist Pflicht, Rest optional
+   - **Abteilungen / Agenten / Business Unit / Budget** → ausfuellen oder `Ueberspringen`
+   - **Datenbank** → SQLite-Pfad bleibt `./data/company-os.db`
+   - **Adapter** → AI-Adapter ist **schon aktiviert** mit `ollama` + `http://localhost:11434` + `mistral-nemo:12b`. Pruefe nur ob's stimmt.
+   - **Kill-Switch** → `armed` lassen
+   - **Fertig** → `Speichern & Anwenden` → POST geht raus → `server/.env` wird geschrieben + `.env.bak` als Backup angelegt
+   - `Zum Dashboard`
+
+**5. KI-Suche testen** (Sidebar links)
+
+   - Modell-Badge oben rechts in der KI-Suche zeigt **gruenen Punkt + `mistral-nemo:12b`** wenn Ollama erreichbar
+   - Tippen: `Was kann The Company OS?` → Enter
+   - Streaming-Antwort erscheint im Panel mit Token-Rate (`X tok / Y ms (Z t/s)`)
+   - **Stop-Button** kann jederzeit gedrueckt werden
+
+**6. Optional: Server neu starten**
+
+   Da der Wizard `.env` geschrieben hat (mit `SETUP_COMPLETED=true`), Server **einmal neu starten** damit neue Env-Variablen geladen werden:
+   ```powershell
+   # In Terminal 1 mit Ctrl+C abbrechen, dann
+   npm run dev
+   ```
+
+**Wizard erneut starten?** Settings-Page → **Setup neu starten**-Button (rechts oben). Loescht localStorage + reloadet.
+
+**Troubleshooting:**
+
+| Problem | Loesung |
+|---|---|
+| KI-Suche Badge grau "offline (Mock)" | Ollama-Daemon laeuft nicht. `ollama serve` (oder Windows-Tray-Icon checken) |
+| Ollama-Error `model requires more system memory` | In `.env`: `OLLAMA_NUM_CTX=2048` (statt 4096). Server neu starten. |
+| `Failed to fetch` beim Wizard-Save | Backend nicht erreichbar. Wizard zeigt automatisch ein **Copy-Snippet** das du manuell in `server/.env` einfuegst. |
+| Wizard kommt nicht erneut | Settings → "Setup neu starten" **oder** `localStorage.clear()` in Browser-DevTools + Reload |
+| `JWT_SECRET environment variable is required` | `.env` fehlt → einmal Wizard durchlaufen ODER `server/.env.example` nach `server/.env` kopieren |
+| Backend-Tests `NODE_ENV=test` Fehler (Windows) | seit `cross-env` Update behoben. `cd server && npm test` laeuft jetzt auf Windows. |
 
 ## Dateistruktur
 
