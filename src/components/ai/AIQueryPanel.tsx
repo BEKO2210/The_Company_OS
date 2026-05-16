@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Sparkles, Send, Square, History, Trash2, ChevronRight,
-  X, Cpu, Loader2,
+  X, Cpu, Loader2, MessageSquare, Briefcase, RotateCw, CheckCircle2,
+  XCircle, Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -11,6 +12,10 @@ import type { QueryResult, QueryHistoryEntry } from '@/ai/types';
 import {
   type ChatMessage, type LlmHealth, checkLlmHealth, streamChat,
 } from '@/ai/llmClient';
+import {
+  dispatchChat, listOrchestratorTasks, retryOrchestratorTask,
+  type OrchestratorTask,
+} from '@/ai/orchestratorClient';
 
 interface AIQueryPanelProps {
   onNavigate?: (path: string) => void;
@@ -30,7 +35,10 @@ const EXAMPLE_CHIPS = [
   'Kritische Workflows',
 ];
 
+type Mode = 'ask' | 'dispatch';
+
 export function AIQueryPanel({ onNavigate, onFilter }: AIQueryPanelProps) {
+  const [mode, setMode] = useState<Mode>('ask');
   const [query, setQuery] = useState('');
   const [history, setHistory] = useState<QueryHistoryEntry[]>(() => getQueryHistory());
   const [showHistory, setShowHistory] = useState(false);
@@ -43,6 +51,11 @@ export function AIQueryPanel({ onNavigate, onFilter }: AIQueryPanelProps) {
   const [mockResult, setMockResult] = useState<QueryResult | null>(null);
   const [meta, setMeta] = useState<{ eval_count?: number; eval_duration_ms?: number; model?: string } | null>(null);
 
+  // Orchestrator state
+  const [tasks, setTasks] = useState<OrchestratorTask[]>([]);
+  const [dispatching, setDispatching] = useState(false);
+  const [queueMode, setQueueMode] = useState<'bullmq' | 'memory' | null>(null);
+
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -50,6 +63,32 @@ export function AIQueryPanel({ onNavigate, onFilter }: AIQueryPanelProps) {
     checkLlmHealth().then(setLlmHealth);
     const id = window.setInterval(() => checkLlmHealth().then(setLlmHealth), 30_000);
     return () => window.clearInterval(id);
+  }, []);
+
+  // Poll orchestrator tasks while dispatch mode is active OR any task is running.
+  useEffect(() => {
+    const anyOpen = tasks.some((t) => t.status === 'queued' || t.status === 'running');
+    if (mode !== 'dispatch' && !anyOpen) return;
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        const list = await listOrchestratorTasks({ limit: 20 });
+        if (!cancelled) setTasks(list);
+      } catch { /* silent */ }
+    };
+    refresh();
+    const id = window.setInterval(refresh, 3000);
+    return () => { cancelled = true; window.clearInterval(id); };
+  }, [mode, tasks]);
+
+  const retryTask = useCallback(async (id: string) => {
+    try {
+      await retryOrchestratorTask(id);
+      const list = await listOrchestratorTasks({ limit: 20 });
+      setTasks(list);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Retry failed');
+    }
   }, []);
 
   const llmActive = !!llmHealth?.reachable;
@@ -77,15 +116,46 @@ export function AIQueryPanel({ onNavigate, onFilter }: AIQueryPanelProps) {
     }
   }, [onNavigate, onFilter]);
 
+  const submitDispatch = useCallback(async (text: string) => {
+    setDispatching(true);
+    setError(null);
+    setResponse('');
+    setMeta(null);
+    try {
+      const res = await dispatchChat(text);
+      setResponse(res.reply);
+      setQueueMode(res.queueMode);
+      // Merge newly created tasks to the top
+      setTasks((prev) => {
+        const ids = new Set(res.tasks.map((t) => t.id));
+        return [...res.tasks, ...prev.filter((t) => !ids.has(t.id))].slice(0, 20);
+      });
+      addToHistory(text, {
+        answer: `(Auftrag → ${res.tasks.length} Task(s))`,
+        parsed: { intent: 'unknown', entity: 'agent', confidence: 100, query: text },
+      });
+      setHistory(getQueryHistory());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Dispatch fehlgeschlagen');
+    } finally {
+      setDispatching(false);
+    }
+  }, []);
+
   const submit = useCallback((q: string) => {
     const text = q.trim();
-    if (!text || streaming) return;
+    if (!text || streaming || dispatching) return;
     setError(null);
     setMockResult(null);
     setResponse('');
     setMeta(null);
     setSuggestions([]);
     setShowHistory(false);
+
+    if (mode === 'dispatch') {
+      void submitDispatch(text);
+      return;
+    }
 
     if (!llmActive) {
       runMock(text);
@@ -115,7 +185,7 @@ export function AIQueryPanel({ onNavigate, onFilter }: AIQueryPanelProps) {
         runMock(text);
       },
     });
-  }, [llmActive, llmHealth?.defaultModel, streaming, runMock]);
+  }, [mode, llmActive, llmHealth?.defaultModel, streaming, dispatching, runMock, submitDispatch]);
 
   const stop = () => {
     abortRef.current?.abort();
@@ -147,26 +217,63 @@ export function AIQueryPanel({ onNavigate, onFilter }: AIQueryPanelProps) {
 
   return (
     <div className="rounded-card bg-bg-secondary border border-border-subtle p-3 flex flex-col gap-2">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-accent-teal" />
-          <span className="text-xs font-semibold text-text-primary tracking-tight">KI-Suche</span>
+      {/* Header — Row 1: title + LLM status */}
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0 flex-shrink">
+          <Sparkles className="w-3.5 h-3.5 text-accent-teal flex-shrink-0" />
+          <span className="text-xs font-semibold text-text-primary tracking-tight truncate">
+            {mode === 'dispatch' ? 'CEO-Auftrag' : 'KI-Suche'}
+          </span>
         </div>
         <button
           type="button"
           title={`LLM: ${modelLabel}`}
           className={cn(
-            'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium border',
+            'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium border min-w-0 flex-shrink',
             llmActive
               ? 'border-status-green/40 bg-status-green/10 text-status-green'
               : 'border-border-default bg-bg-tertiary text-text-tertiary',
           )}
         >
-          <span className={cn('w-1.5 h-1.5 rounded-full', llmActive ? 'bg-status-green animate-pulse-status' : 'bg-text-muted')} />
-          <Cpu className="w-2.5 h-2.5" />
-          <span className="truncate max-w-[110px]">{modelLabel}</span>
+          <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', llmActive ? 'bg-status-green animate-pulse-status' : 'bg-text-muted')} />
+          <Cpu className="w-2.5 h-2.5 flex-shrink-0" />
+          <span className="truncate max-w-[72px]">{modelLabel}</span>
         </button>
+      </div>
+
+      {/* Header — Row 2: mode toggle (full width, no overflow risk) */}
+      <div className="flex items-center gap-1">
+        <div className="flex bg-bg-tertiary rounded-full p-0.5 border border-border-subtle w-full">
+          <button
+            type="button"
+            onClick={() => setMode('ask')}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors',
+              mode === 'ask' ? 'bg-accent-teal text-bg-primary' : 'text-text-tertiary hover:text-text-primary',
+            )}
+            title="Frage stellen (nur LLM-Antwort)"
+          >
+            <MessageSquare className="w-2.5 h-2.5" />
+            Frage
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('dispatch')}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors',
+              mode === 'dispatch' ? 'bg-accent-teal text-bg-primary' : 'text-text-tertiary hover:text-text-primary',
+            )}
+            title="An Agenten verteilen + Cron-Verarbeitung"
+          >
+            <Briefcase className="w-2.5 h-2.5" />
+            Auftrag
+          </button>
+        </div>
+        {queueMode && mode === 'dispatch' && (
+          <span className="text-[9px] text-text-tertiary uppercase tracking-wider flex-shrink-0">
+            {queueMode === 'bullmq' ? 'redis' : 'mem'}
+          </span>
+        )}
       </div>
 
       {/* Input */}
@@ -177,7 +284,11 @@ export function AIQueryPanel({ onNavigate, onFilter }: AIQueryPanelProps) {
           value={query}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder={llmActive ? 'Frag dein Unternehmen...' : 'z.B. Zeige alle Risiken'}
+          placeholder={
+            mode === 'dispatch'
+              ? 'Auftrag an die Agenten (z.B. "Sende Angebot an client@x.de") ...'
+              : (llmActive ? 'Frag dein Unternehmen...' : 'z.B. Zeige alle Risiken')
+          }
           className={cn(
             'w-full resize-none rounded-input bg-bg-tertiary border border-border-default',
             'pl-3 pr-10 py-2 text-xs text-text-primary placeholder:text-text-muted',
@@ -197,16 +308,16 @@ export function AIQueryPanel({ onNavigate, onFilter }: AIQueryPanelProps) {
           <button
             type="button"
             onClick={() => submit(query)}
-            disabled={!query.trim()}
+            disabled={!query.trim() || dispatching}
             className={cn(
               'absolute right-1.5 bottom-1.5 w-7 h-7 rounded-button flex items-center justify-center transition-colors',
-              query.trim()
+              query.trim() && !dispatching
                 ? 'bg-accent-teal text-bg-primary hover:bg-accent-teal/90'
                 : 'bg-bg-elevated text-text-muted cursor-not-allowed',
             )}
-            title="Senden (Enter)"
+            title={mode === 'dispatch' ? 'An Agenten senden (Enter)' : 'Senden (Enter)'}
           >
-            <Send className="w-3.5 h-3.5" />
+            {dispatching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
           </button>
         )}
       </div>
@@ -280,6 +391,62 @@ export function AIQueryPanel({ onNavigate, onFilter }: AIQueryPanelProps) {
       {error && !mockResult && (
         <div className="text-[10px] text-status-red bg-status-red/10 border border-status-red/30 rounded-md px-2 py-1">
           {error}
+        </div>
+      )}
+
+      {/* Orchestrator task list (dispatch mode) */}
+      {mode === 'dispatch' && tasks.length > 0 && (
+        <div className="rounded-md bg-bg-tertiary border border-border-subtle p-2 max-h-72 overflow-y-auto">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+              Verteilte Auftraege ({tasks.length})
+            </span>
+            <button
+              type="button"
+              onClick={() => setTasks([])}
+              className="text-text-muted hover:text-text-primary"
+              title="Ausblenden"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+          <div className="space-y-1.5">
+            {tasks.map((t) => (
+              <div key={t.id} className="bg-bg-secondary rounded p-1.5 border border-border-subtle">
+                <div className="flex items-center gap-1.5">
+                  {t.status === 'queued' && <Clock className="w-3 h-3 text-text-tertiary" />}
+                  {t.status === 'running' && <Loader2 className="w-3 h-3 text-accent-teal animate-spin" />}
+                  {t.status === 'done' && <CheckCircle2 className="w-3 h-3 text-status-green" />}
+                  {(t.status === 'failed' || t.status === 'cancelled') && <XCircle className="w-3 h-3 text-status-red" />}
+                  <span className="text-[11px] font-medium text-text-primary truncate flex-1" title={t.title}>
+                    {t.title}
+                  </span>
+                  {t.status === 'failed' && (
+                    <button
+                      type="button"
+                      onClick={() => retryTask(t.id)}
+                      className="text-text-tertiary hover:text-accent-teal"
+                      title="Erneut versuchen"
+                    >
+                      <RotateCw className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  {t.agentId && (
+                    <span className="text-[9px] text-text-tertiary font-mono-data">{t.agentId}</span>
+                  )}
+                  {t.tool && (
+                    <span className="text-[9px] text-accent-teal/80">{t.tool}</span>
+                  )}
+                  <span className="text-[9px] text-text-muted ml-auto">{t.status}</span>
+                </div>
+                {t.error && (
+                  <p className="text-[10px] text-status-red mt-1 truncate" title={t.error}>{t.error}</p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

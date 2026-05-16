@@ -381,3 +381,42 @@ CREATE INDEX IF NOT EXISTS idx_human_experts_status ON human_experts(status);
 CREATE INDEX IF NOT EXISTS idx_human_experts_availability ON human_experts(availability);
 CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
 CREATE INDEX IF NOT EXISTS idx_kill_switch_log_status ON kill_switch_log(status);
+
+-- ─── Orchestrator: Agent Tasks ───
+CREATE TABLE IF NOT EXISTS agent_tasks (
+  id TEXT PRIMARY KEY,
+  parent_id TEXT,
+  agent_id TEXT,
+  title TEXT NOT NULL,
+  description TEXT,
+  priority TEXT DEFAULT 'medium',
+  status TEXT DEFAULT 'queued',
+  source TEXT DEFAULT 'chat',
+  source_user TEXT,
+  tool TEXT,
+  input TEXT,
+  result TEXT,
+  error TEXT,
+  attempts INTEGER DEFAULT 0,
+  scheduled_at DATETIME,
+  started_at DATETIME,
+  finished_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_agent_tasks_status ON agent_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_agent_tasks_agent ON agent_tasks(agent_id);
+CREATE INDEX IF NOT EXISTS idx_agent_tasks_created ON agent_tasks(created_at);
+
+-- ─── Orchestrator: Chat Messages (LLM conversation history) ───
+CREATE TABLE IF NOT EXISTS orchestrator_messages (
+  id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  role TEXT NOT NULL,
+  content TEXT NOT NULL,
+  tool_calls TEXT,
+  user_email TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_orchestrator_messages_session ON orchestrator_messages(session_id);
+CREATE INDEX IF NOT EXISTS idx_orchestrator_messages_created ON orchestrator_messages(created_at);

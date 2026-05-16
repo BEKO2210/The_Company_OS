@@ -24,6 +24,7 @@ import dashboardRoutes from './routes/dashboard.js';
 import aiRoutes from './routes/ai.js';
 import setupRoutes from './routes/setup.js';
 import llmRoutes from './routes/llm.js';
+import orchestratorRoutes from './routes/orchestrator.js';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -88,6 +89,7 @@ export function createApp() {
   app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/ai/llm', llmRoutes); // unauth - local LLM proxy, mount before /api/ai
   app.use('/api/ai', aiRoutes);
+  app.use('/api/orchestrator', orchestratorRoutes);
   app.use('/api/setup', setupRoutes);
 
   // 404 handler

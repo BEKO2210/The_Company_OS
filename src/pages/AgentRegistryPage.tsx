@@ -347,20 +347,9 @@ function AgentDetailDrawer({
                 <p className="text-sm text-text-secondary">
                   Zugewiesene Aufgaben und aktuelle Projekte fur {agent.name}.
                 </p>
-                {/* Placeholder tasks */}
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="bg-bg-elevated/50 rounded-lg p-3 border border-border-subtle"
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="status-dot status-dot-yellow" />
-                      <span className="text-sm font-medium text-text-primary">Task {i}</span>
-                      <span className="text-[10px] badge-yellow ml-auto">Hoch</span>
-                    </div>
-                    <p className="text-xs text-text-tertiary">In Bearbeitung - Vor {i * 10}m aktualisiert</p>
-                  </div>
-                ))}
+                <div className="bg-bg-elevated/50 rounded-lg p-6 border border-border-subtle text-center">
+                  <p className="text-sm text-text-tertiary">Keine offenen Aufgaben.</p>
+                </div>
               </motion.div>
             )}
 
@@ -407,15 +396,9 @@ function AgentDetailDrawer({
                 <p className="text-sm text-text-secondary">
                   Aktivitatslog fur {agent.name}.
                 </p>
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-border-default mt-1.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm text-text-secondary">Aktion durchgefuhrt</p>
-                      <p className="text-xs text-text-tertiary">Vor {i * 15}m</p>
-                    </div>
-                  </div>
-                ))}
+                <div className="bg-bg-elevated/50 rounded-lg p-6 border border-border-subtle text-center">
+                  <p className="text-sm text-text-tertiary">Noch keine Aktivitaten aufgezeichnet.</p>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

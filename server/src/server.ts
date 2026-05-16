@@ -14,6 +14,7 @@ import { createApp } from './app.js';
 import { db } from './db/connection.js';
 import { seed } from './db/seed.js';
 import { isDbEmpty } from './db/connection.js';
+import { startOrchestrator, stopOrchestrator } from './orchestrator/index.js';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
@@ -36,23 +37,22 @@ async function startServer() {
     console.log(`[SERVER] Health check: http://localhost:${PORT}/health`);
   });
 
-  process.on('SIGTERM', () => {
-    console.log('[SERVER] SIGTERM received, shutting down gracefully...');
-    server.close(() => {
-      db.close();
-      console.log('[SERVER] Server closed, database connection closed');
-      process.exit(0);
-    });
+  // Start orchestrator (queue + worker + cron). Non-fatal on error.
+  startOrchestrator().catch((err) => {
+    console.error('[SERVER] Orchestrator start failed:', err);
   });
 
-  process.on('SIGINT', () => {
-    console.log('[SERVER] SIGINT received, shutting down gracefully...');
+  const shutdown = async (signal: string) => {
+    console.log(`[SERVER] ${signal} received, shutting down gracefully...`);
+    await stopOrchestrator().catch(() => {});
     server.close(() => {
       db.close();
       console.log('[SERVER] Server closed, database connection closed');
       process.exit(0);
     });
-  });
+  };
+  process.on('SIGTERM', () => { shutdown('SIGTERM'); });
+  process.on('SIGINT',  () => { shutdown('SIGINT'); });
 
   return server;
 }
