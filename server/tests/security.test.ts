@@ -6,7 +6,6 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { createApp } from '../src/app.js';
 import { testDb, initSchema } from './setup.js';
-import jwt from 'jsonwebtoken';
 import { hashPasswordSync, generateToken, verifyToken } from '../src/utils/crypto.js';
 
 const app = createApp();
@@ -629,7 +628,7 @@ describe('Security Tests - JWT Configuration', () => {
     const payload = { userId: 'test', email: 'test@test.de', role: 'admin' };
     const token = generateToken(payload, JWT_SECRET, '1h');
 
-    const decoded = verifyToken(token, JWT_SECRET);
+    const decoded = verifyToken<{ userId: string; email: string; role: string }>(token, JWT_SECRET);
     expect(decoded.userId).toBe('test');
     expect(decoded.role).toBe('admin');
   });

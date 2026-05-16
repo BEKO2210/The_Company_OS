@@ -50,8 +50,9 @@ router.post('/:id/approve', authMiddleware, requireWriteAccess, asyncHandler(asy
   const result = approveApproval(req.params.id as string, req.user!.userId, req.user!.role, req.user!.email);
   
   if (!result.success) {
-    // Check if it's a permission error
-    if (result.error?.includes('Red line') || result.error?.includes('founder')) {
+    // Check if it's a permission error (case-insensitive: service uses ALL CAPS)
+    const errLower = result.error?.toLowerCase() ?? '';
+    if (errLower.includes('red line') || errLower.includes('founder') || errLower.includes('viewer')) {
       res.status(403).json({ success: false, error: result.error });
       return;
     }
@@ -80,7 +81,8 @@ router.post('/:id/reject', authMiddleware, requireWriteAccess, asyncHandler(asyn
   const result = rejectApproval(req.params.id as string, req.user!.userId, req.user!.role, req.user!.email, reason);
   
   if (!result.success) {
-    if (result.error?.includes('Red line') || result.error?.includes('founder')) {
+    const errLower = result.error?.toLowerCase() ?? '';
+    if (errLower.includes('red line') || errLower.includes('founder') || errLower.includes('viewer')) {
       res.status(403).json({ success: false, error: result.error });
       return;
     }

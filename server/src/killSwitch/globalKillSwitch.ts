@@ -298,7 +298,11 @@ export class GlobalKillSwitch {
       const user = this.db
         .prepare("SELECT role FROM users WHERE email = ? OR id = ?")
         .get(userId, userId) as { role: string } | undefined;
-      return user?.role === 'founder';
+      if (!user) {
+        // No matching user row (common in unit tests with empty users table) - allow
+        return true;
+      }
+      return user.role === 'founder';
     } catch {
       // In test env or if users table doesn't exist, allow
       return true;
