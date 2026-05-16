@@ -12,7 +12,7 @@
 
 🔗 **Dashboard:** [https://56r72ulnxurem.kimi.page](https://56r72ulnxurem.kimi.page)
 
-## Was ist implementiert? (RUN-001)
+## Was ist implementiert?
 
 ### Dashboard (13 Screens)
 | Screen | Status | Beschreibung |
