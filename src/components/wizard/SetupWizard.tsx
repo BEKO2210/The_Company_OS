@@ -2,12 +2,15 @@ import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Hexagon, ChevronRight, ChevronLeft, Check, Building2, Bot,
-  Boxes, Wallet, Shield, Sparkles, X, Trash2,
+  Boxes, Wallet, Shield, Sparkles, X, Trash2, Database, Plug,
+  ChevronDown, Copy, AlertCircle, Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  type CompanyConfig, DEFAULT_CONFIG, getCompanyConfig,
+  type CompanyConfig, type AdapterKey, DEFAULT_CONFIG, getCompanyConfig,
 } from '@/lib/storage';
+import { ADAPTER_SPECS, getProviderSpec } from '@/lib/adapterSpecs';
+import { serializeEnv } from '@/lib/envSerializer';
 
 const easeOut = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -15,7 +18,9 @@ interface Props {
   onComplete: (cfg?: CompanyConfig) => void;
 }
 
-type StepKey = 'welcome' | 'company' | 'departments' | 'agents' | 'unit' | 'budget' | 'policy' | 'done';
+type StepKey =
+  | 'welcome' | 'company' | 'departments' | 'agents' | 'unit'
+  | 'budget' | 'database' | 'adapters' | 'policy' | 'done';
 
 interface StepDef {
   key: StepKey;
@@ -31,6 +36,8 @@ const STEPS: StepDef[] = [
   { key: 'agents',      title: 'Agenten',        subtitle: 'Erste KI-Agenten anlegen',         icon: Bot },
   { key: 'unit',        title: 'Business Unit',  subtitle: 'Dein erstes Produkt-/Revenue-Modell', icon: Boxes },
   { key: 'budget',      title: 'Budget',         subtitle: 'Monatsbudget und Ziele',           icon: Wallet },
+  { key: 'database',    title: 'Datenbank',      subtitle: 'Wo werden Daten gespeichert?',     icon: Database },
+  { key: 'adapters',    title: 'Adapter',        subtitle: 'Externe Schnittstellen anbinden (optional)', icon: Plug },
   { key: 'policy',      title: 'Kill-Switch',    subtitle: 'Sicherheits-Standard bestaetigen', icon: Shield },
   { key: 'done',        title: 'Fertig',         subtitle: 'Alles bereit',                     icon: Check },
 ];
@@ -312,6 +319,153 @@ function StepBudget({ cfg, set }: { cfg: CompanyConfig; set: (next: CompanyConfi
   );
 }
 
+function StepDatabase({ cfg, set }: { cfg: CompanyConfig; set: (next: CompanyConfig) => void }) {
+  return (
+    <div className="max-w-lg mx-auto w-full space-y-4">
+      <div className="data-card">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-10 h-10 rounded-card bg-accent-blue/10 border border-accent-blue/30 flex items-center justify-center flex-shrink-0">
+            <Database className="w-5 h-5 text-accent-blue" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-text-primary">SQLite (Standard)</h3>
+            <p className="text-xs text-text-secondary mt-0.5">
+              Eingebettete Datei-DB - kein zusaetzlicher Service noetig. Ideal fuer Solo-Founder Setups.
+            </p>
+          </div>
+        </div>
+        <Field label="Datei-Pfad (relativ zum Server-Root)">
+          <TextInput
+            value={cfg.database.path}
+            onChange={(e) => set({ ...cfg, database: { ...cfg.database, path: e.target.value } })}
+            placeholder="./data/company-os.db"
+          />
+        </Field>
+      </div>
+      <p className="text-[11px] text-text-muted text-center">
+        Postgres / MySQL koennen spaeter ueber server/.env getauscht werden.
+      </p>
+    </div>
+  );
+}
+
+function StepAdapters({ cfg, set }: { cfg: CompanyConfig; set: (next: CompanyConfig) => void }) {
+  const [openKey, setOpenKey] = useState<AdapterKey | null>(null);
+
+  const setAdapter = (key: AdapterKey, patch: Partial<CompanyConfig['adapters'][AdapterKey]>) => {
+    set({
+      ...cfg,
+      adapters: {
+        ...cfg.adapters,
+        [key]: { ...cfg.adapters[key], ...patch },
+      },
+    });
+  };
+
+  const setCredential = (key: AdapterKey, field: string, value: string) => {
+    setAdapter(key, {
+      credentials: { ...cfg.adapters[key].credentials, [field]: value },
+    });
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto w-full">
+      <p className="text-xs text-text-tertiary text-center mb-4">
+        Schalte ein, was du nutzt. Was du leer laesst, bleibt im Mock-Modus. Alles ist spaeter aenderbar.
+      </p>
+      <div className="space-y-2">
+        {ADAPTER_SPECS.map((spec) => {
+          const ac = cfg.adapters[spec.key];
+          const open = openKey === spec.key;
+          const provider = getProviderSpec(spec.key, ac.provider);
+          const filledCount = provider
+            ? provider.fields.filter((f) => (ac.credentials[f.key] || '').length > 0).length
+            : 0;
+          return (
+            <div key={spec.key} className="bg-bg-tertiary border border-border-subtle rounded-card overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setOpenKey(open ? null : spec.key)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-bg-elevated transition-colors"
+              >
+                <Plug className={cn('w-4 h-4 flex-shrink-0', ac.enabled ? 'text-accent-teal' : 'text-text-muted')} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-text-primary truncate">{spec.title}</span>
+                    {ac.enabled ? (
+                      <span className="badge-teal text-[10px] px-1.5 py-0.5 rounded">aktiv</span>
+                    ) : (
+                      <span className="badge-gray text-[10px] px-1.5 py-0.5 rounded">mock</span>
+                    )}
+                    {ac.enabled && provider && (
+                      <span className="text-[10px] text-text-tertiary">
+                        {filledCount}/{provider.fields.length} Felder
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-text-tertiary truncate">{spec.description}</p>
+                </div>
+                <ChevronDown className={cn('w-4 h-4 text-text-tertiary transition-transform flex-shrink-0', open && 'rotate-180')} />
+              </button>
+
+              <AnimatePresence initial={false}>
+                {open && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: easeOut }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-4 pb-4 pt-2 border-t border-border-subtle space-y-3">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={ac.enabled}
+                          onChange={(e) => setAdapter(spec.key, { enabled: e.target.checked })}
+                          className="w-4 h-4 accent-accent-teal"
+                        />
+                        <span className="text-xs text-text-primary">Aktivieren</span>
+                      </label>
+
+                      <Field label="Provider">
+                        <Select
+                          value={ac.provider}
+                          onChange={(e) => setAdapter(spec.key, { provider: e.target.value, credentials: {} })}
+                          disabled={!ac.enabled}
+                        >
+                          {spec.providers.map((p) => (
+                            <option key={p.id} value={p.id}>{p.label} - {p.description}</option>
+                          ))}
+                        </Select>
+                      </Field>
+
+                      {ac.enabled && provider && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {provider.fields.map((field) => (
+                            <Field key={field.key} label={`${field.label}${field.required ? ' *' : ''}`}>
+                              <TextInput
+                                type={field.type === 'password' ? 'password' : field.type === 'number' ? 'number' : 'text'}
+                                value={ac.credentials[field.key] ?? ''}
+                                onChange={(e) => setCredential(spec.key, field.key, e.target.value)}
+                                placeholder={field.placeholder}
+                              />
+                            </Field>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function StepPolicy({ cfg, set }: { cfg: CompanyConfig; set: (next: CompanyConfig) => void }) {
   return (
     <div className="max-w-lg mx-auto w-full">
@@ -342,7 +496,25 @@ function StepPolicy({ cfg, set }: { cfg: CompanyConfig; set: (next: CompanyConfi
   );
 }
 
-function StepDone({ cfg }: { cfg: CompanyConfig }) {
+type FinishState =
+  | { kind: 'idle' }
+  | { kind: 'saving' }
+  | { kind: 'saved'; envPath: string }
+  | { kind: 'copy-only'; reason: string };
+
+function StepDone({
+  cfg,
+  finishState,
+  envSnippet,
+}: {
+  cfg: CompanyConfig;
+  finishState: FinishState;
+  envSnippet: string;
+}) {
+  const enabledAdapters = ADAPTER_SPECS
+    .filter((s) => cfg.adapters[s.key]?.enabled)
+    .map((s) => s.title);
+
   const summary = [
     { label: 'Firma',         value: cfg.companyName || '(leer)' },
     { label: 'Founder',       value: cfg.founderName ? `${cfg.founderName} - ${cfg.founderRole}` : '(leer)' },
@@ -350,29 +522,88 @@ function StepDone({ cfg }: { cfg: CompanyConfig }) {
     { label: 'Agenten',       value: cfg.agents.length ? `${cfg.agents.length} angelegt` : '(keine)' },
     { label: 'Business Unit', value: cfg.businessUnit?.name || '(keine)' },
     { label: 'Monatsbudget',  value: cfg.budget.monthly ? `${cfg.budget.monthly.toLocaleString('de-DE')} EUR` : '(nicht gesetzt)' },
+    { label: 'Datenbank',     value: `${cfg.database.type}: ${cfg.database.path}` },
+    { label: 'Adapter aktiv', value: enabledAdapters.length ? enabledAdapters.join(', ') : '(alle im Mock-Modus)' },
     { label: 'Kill-Switch',   value: cfg.killSwitchArmed ? 'armed' : 'disabled' },
   ];
+
+  const copyEnv = async () => {
+    try {
+      await navigator.clipboard.writeText(envSnippet);
+    } catch {
+      /* ignore */
+    }
+  };
+
   return (
-    <div className="max-w-lg mx-auto w-full">
-      <div className="flex flex-col items-center text-center mb-6">
-        <div className="w-14 h-14 rounded-full bg-status-green/10 border border-status-green/30 flex items-center justify-center mb-3">
-          <Check className="w-7 h-7 text-status-green" strokeWidth={2.5} />
+    <div className="max-w-2xl mx-auto w-full space-y-4">
+      <div className="flex flex-col items-center text-center">
+        <div className={cn(
+          'w-14 h-14 rounded-full border flex items-center justify-center mb-3',
+          finishState.kind === 'saved'    && 'bg-status-green/10 border-status-green/30',
+          finishState.kind === 'copy-only' && 'bg-status-yellow/10 border-status-yellow/30',
+          finishState.kind === 'saving'   && 'bg-accent-teal/10 border-accent-teal/30',
+          finishState.kind === 'idle'     && 'bg-bg-tertiary border-border-subtle',
+        )}>
+          {finishState.kind === 'saving'
+            ? <Loader2 className="w-7 h-7 text-accent-teal animate-spin" />
+            : finishState.kind === 'copy-only'
+              ? <AlertCircle className="w-7 h-7 text-status-yellow" />
+              : <Check className="w-7 h-7 text-status-green" strokeWidth={2.5} />}
         </div>
-        <h2 className="text-lg font-semibold text-text-primary tracking-tight">Konfiguration bereit</h2>
+        <h2 className="text-lg font-semibold text-text-primary tracking-tight">
+          {finishState.kind === 'saved'    && 'Konfiguration gespeichert'}
+          {finishState.kind === 'copy-only' && 'Backend nicht erreichbar'}
+          {finishState.kind === 'saving'   && 'Speichere ...'}
+          {finishState.kind === 'idle'     && 'Konfiguration bereit'}
+        </h2>
+        {finishState.kind === 'saved' && (
+          <p className="text-xs text-text-tertiary mt-1">
+            server/.env aktualisiert &mdash; Server bitte neu starten.
+          </p>
+        )}
+        {finishState.kind === 'copy-only' && (
+          <p className="text-xs text-text-tertiary mt-1 max-w-md">
+            Grund: {finishState.reason}. Kopiere unten und fuege es in <code>server/.env</code> ein, dann Server neu starten.
+          </p>
+        )}
       </div>
+
       <div className="data-card divide-y divide-border-subtle">
         {summary.map((s) => (
           <div key={s.label} className="flex items-start justify-between gap-4 py-2 first:pt-0 last:pb-0">
             <span className="text-xs text-text-tertiary">{s.label}</span>
-            <span className="text-xs text-text-primary text-right max-w-[260px] truncate">{s.value}</span>
+            <span className="text-xs text-text-primary text-right max-w-[420px] truncate">{s.value}</span>
           </div>
         ))}
       </div>
+
+      {finishState.kind === 'copy-only' && (
+        <div className="data-card">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">.env Snippet</span>
+            <button
+              type="button"
+              onClick={copyEnv}
+              className="inline-flex items-center gap-1.5 text-xs text-accent-teal hover:text-accent-teal/80"
+            >
+              <Copy className="w-3.5 h-3.5" /> Kopieren
+            </button>
+          </div>
+          <pre className="text-[11px] font-mono-data text-text-secondary bg-bg-primary border border-border-subtle rounded p-3 max-h-[260px] overflow-auto whitespace-pre-wrap">
+            {envSnippet}
+          </pre>
+        </div>
+      )}
     </div>
   );
 }
 
 // ─── Container ───────────────────────────────────────────────────────────
+
+const API_BASE = (typeof window !== 'undefined' && (window as { __API_BASE__?: string }).__API_BASE__)
+  || (import.meta.env?.VITE_API_URL as string | undefined)
+  || 'http://localhost:3001/api';
 
 export default function SetupWizard({ onComplete }: Props) {
   const [idx, setIdx] = useState(0);
@@ -380,6 +611,7 @@ export default function SetupWizard({ onComplete }: Props) {
     const existing = getCompanyConfig();
     return existing.companyName ? existing : { ...DEFAULT_CONFIG };
   });
+  const [finishState, setFinishState] = useState<FinishState>({ kind: 'idle' });
 
   const current = STEPS[idx];
   const isLast = idx === STEPS.length - 1;
@@ -393,12 +625,51 @@ export default function SetupWizard({ onComplete }: Props) {
     }
   }, [current.key, cfg]);
 
-  const finish = () => {
-    onComplete({ ...cfg, createdAt: cfg.createdAt || new Date().toISOString() });
+  const finalCfg = useMemo(
+    () => ({ ...cfg, createdAt: cfg.createdAt || new Date().toISOString() }),
+    [cfg],
+  );
+
+  const envSnippet = useMemo(() => serializeEnv(finalCfg), [finalCfg]);
+
+  const persistToServer = async (): Promise<{ ok: true; envPath: string } | { ok: false; reason: string }> => {
+    try {
+      const enabledKeys = ADAPTER_SPECS.filter((s) => finalCfg.adapters[s.key]?.enabled).map((s) => s.title);
+      const r = await fetch(`${API_BASE}/setup/save-env`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          env: envSnippet,
+          configSummary: { companyName: finalCfg.companyName, adaptersEnabled: enabledKeys },
+        }),
+      });
+      const json = await r.json().catch(() => ({} as { success?: boolean; error?: string; data?: { envPath?: string } }));
+      if (r.ok && json.success) {
+        return { ok: true, envPath: json.data?.envPath || 'server/.env' };
+      }
+      return { ok: false, reason: json.error || `Server antwortete mit ${r.status}.` };
+    } catch (err) {
+      return { ok: false, reason: err instanceof Error ? err.message : 'Backend nicht erreichbar.' };
+    }
+  };
+
+  const finish = async () => {
+    setFinishState({ kind: 'saving' });
+    const result = await persistToServer();
+    if (result.ok) {
+      setFinishState({ kind: 'saved', envPath: result.envPath });
+    } else {
+      setFinishState({ kind: 'copy-only', reason: result.reason });
+    }
+    // do not auto-close: user clicks "Zum Dashboard" in the footer
+  };
+
+  const closeWizard = () => {
+    onComplete(finalCfg);
   };
 
   const skipAll = () => {
-    onComplete({ ...cfg, createdAt: cfg.createdAt || new Date().toISOString() });
+    onComplete(finalCfg);
   };
 
   return (
@@ -467,8 +738,10 @@ export default function SetupWizard({ onComplete }: Props) {
               {current.key === 'agents'      && <StepAgents cfg={cfg} set={setCfg} />}
               {current.key === 'unit'        && <StepBusinessUnit cfg={cfg} set={setCfg} />}
               {current.key === 'budget'      && <StepBudget cfg={cfg} set={setCfg} />}
+              {current.key === 'database'    && <StepDatabase cfg={cfg} set={setCfg} />}
+              {current.key === 'adapters'    && <StepAdapters cfg={cfg} set={setCfg} />}
               {current.key === 'policy'      && <StepPolicy cfg={cfg} set={setCfg} />}
-              {current.key === 'done'        && <StepDone cfg={cfg} />}
+              {current.key === 'done'        && <StepDone cfg={cfg} finishState={finishState} envSnippet={envSnippet} />}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -486,9 +759,19 @@ export default function SetupWizard({ onComplete }: Props) {
             </GhostButton>
           )}
           {isLast ? (
-            <PrimaryButton onClick={finish}>
-              <Check className="w-4 h-4" /> Zum Dashboard
-            </PrimaryButton>
+            finishState.kind === 'idle' ? (
+              <PrimaryButton onClick={finish}>
+                <Check className="w-4 h-4" /> Speichern & Anwenden
+              </PrimaryButton>
+            ) : finishState.kind === 'saving' ? (
+              <PrimaryButton disabled>
+                <Loader2 className="w-4 h-4 animate-spin" /> Speichere ...
+              </PrimaryButton>
+            ) : (
+              <PrimaryButton onClick={closeWizard}>
+                <Check className="w-4 h-4" /> Zum Dashboard
+              </PrimaryButton>
+            )
           ) : (
             <PrimaryButton onClick={() => setIdx(idx + 1)} disabled={!canForward}>
               Weiter <ChevronRight className="w-4 h-4" />
