@@ -854,8 +854,8 @@ export default function AgentRegistryPage() {
         <span className="text-[11px] badge-purple px-2.5 py-1 rounded-full">
           {cLevelCount} C-Level
         </span>
-        <span className="text-[11px] badge-red px-2.5 py-1 rounded-full animate-pulse-red">
-          2 Human-Approval erforderlich
+        <span className="text-[11px] badge-gray px-2.5 py-1 rounded-full">
+          0 Human-Approval erforderlich
         </span>
       </motion.div>
 
