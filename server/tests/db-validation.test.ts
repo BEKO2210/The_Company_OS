@@ -8,8 +8,9 @@ import { seed } from '../src/db/seed.js';
 import { hashPasswordSync } from '../src/utils/crypto.js';
 
 describe('Database Validation Suite', () => {
-  beforeAll(async () => {
-    // Seed the database
+  // Setup.ts wipes all tables in beforeEach, so re-seed before every test
+  // to keep counts deterministic.
+  beforeEach(async () => {
     await seed();
   });
 

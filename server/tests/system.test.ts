@@ -6,6 +6,7 @@
 import request from 'supertest';
 import { createApp } from '../src/app.js';
 import { db } from '../src/db/connection.js';
+import { seed } from '../src/db/seed.js';
 
 const app = createApp();
 
@@ -18,9 +19,10 @@ let adminToken: string;
 // ═══════════════════════════════════════════════════════════════
 
 describe('Complete System Integration', () => {
-  // ─── Cleanup after all tests ───
-  afterAll(() => {
-    db.close();
+  // setup.ts wipes every table in beforeEach, so re-seed before
+  // each test or auth/data lookups will fail.
+  beforeEach(async () => {
+    await seed();
   });
 
   // ─── 1. LOGIN ───
