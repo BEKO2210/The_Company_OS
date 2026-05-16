@@ -12,6 +12,30 @@
 
 🔗 **Dashboard:** [https://56r72ulnxurem.kimi.page](https://56r72ulnxurem.kimi.page)
 
+## Screenshots
+
+<div align="center">
+
+### First-Run Setup Wizard
+<img src="docs/screenshots/01-wizard-welcome.png" alt="Setup Wizard - Willkommen" width="900" />
+
+<br />
+
+### Dashboard mit eingerichteter Firma
+<img src="docs/screenshots/03-dashboard.png" alt="Dashboard nach Wizard" width="900" />
+
+<br />
+
+### Agent Registry
+<img src="docs/screenshots/04-agents.png" alt="Agent Registry" width="900" />
+
+<br />
+
+### Finance
+<img src="docs/screenshots/05-finance.png" alt="Finance KPIs aus Budget" width="900" />
+
+</div>
+
 ## Was ist implementiert?
 
 ### Dashboard (13 Screens)
