@@ -61,7 +61,7 @@ const typeConfig: Record<string, { label: string; icon: React.ElementType; color
   invoice: { label: 'Rechnung', icon: Receipt, color: 'text-accent-blue bg-accent-blue/15' },
   freelancer: { label: 'Beauftragung', icon: UserPlus, color: 'text-accent-purple bg-accent-purple/15' },
   authority_communication: { label: 'Behörde', icon: Building, color: 'text-status-red bg-status-red/15' },
-  termination: { label: 'Kündigung', icon: Ban, color: 'text-status-red bg-status-red/15' },
+  termination: { label: 'Kuendigung', icon: Ban, color: 'text-status-red bg-status-red/15' },
   refund: { label: 'Erstattung', icon: RotateCcw, color: 'text-status-red bg-status-red/15' },
   safety_veto_override: { label: 'Safety-Veto', icon: AlertOctagon, color: 'text-status-red bg-status-red/15' },
   physical_security: { label: 'Sicherheitseinsatz', icon: HardHat, color: 'text-status-red bg-status-red/15' },
@@ -86,7 +86,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 };
 
 function formatAmount(amount: number | undefined): string {
-  if (amount === undefined) return '\u2014';
+  if (amount === undefined) return '-';
   return `EUR ${amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
@@ -272,7 +272,7 @@ export default function ApprovalQueuePage() {
     { value: 'invoice', label: 'Rechnung (RL)' },
     { value: 'freelancer', label: 'Beauftragung (RL)' },
     { value: 'authority_communication', label: 'Behörde (RL)' },
-    { value: 'termination', label: 'Kündigung (RL)' },
+    { value: 'termination', label: 'Kuendigung (RL)' },
     { value: 'refund', label: 'Erstattung (RL)' },
     { value: 'safety_veto_override', label: 'Safety-Veto (RL)' },
     { value: 'physical_security', label: 'Sicherheitseinsatz (RL)' },
@@ -980,7 +980,7 @@ export default function ApprovalQueuePage() {
                   <div className="flex items-center gap-2">
                     <Shield className={cn('w-4 h-4', (detailApproval.redLine || isRedLineType(detailApproval.type)) ? 'text-status-red' : 'text-status-green')} />
                     <span className="text-sm text-text-secondary">
-                      Rote Linie: {(detailApproval.redLine || isRedLineType(detailApproval.type)) ? 'Ja \u2014 Erfordert Founder-Freigabe' : 'Nein'}
+                      Rote Linie: {(detailApproval.redLine || isRedLineType(detailApproval.type)) ? 'Ja - Erfordert Founder-Freigabe' : 'Nein'}
                     </span>
                   </div>
                   {(detailApproval.redLine || isRedLineType(detailApproval.type)) && !isFounder && (

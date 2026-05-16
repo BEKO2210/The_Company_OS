@@ -321,11 +321,15 @@ export default function WorkflowsPage() {
   // Stats
   const totalWorkflows = workflows.length;
   const activeWorkflows = workflows.filter(w => w.status === 'active').length;
-  const avgSuccessRate = Math.round(workflows.reduce((sum, w) => sum + w.successRate, 0) / workflows.length);
-  const avgDurationHours = Math.round(workflows.reduce((sum, w) => {
-    const h = parseFloat(w.avgDuration);
-    return sum + (isNaN(h) ? 0 : h);
-  }, 0) / workflows.length);
+  const avgSuccessRate = totalWorkflows > 0
+    ? Math.round(workflows.reduce((sum, w) => sum + w.successRate, 0) / totalWorkflows)
+    : 0;
+  const avgDurationHours = totalWorkflows > 0
+    ? Math.round(workflows.reduce((sum, w) => {
+        const h = parseFloat(w.avgDuration);
+        return sum + (isNaN(h) ? 0 : h);
+      }, 0) / totalWorkflows)
+    : 0;
 
   return (
     <motion.div
@@ -340,7 +344,7 @@ export default function WorkflowsPage() {
           <div>
             <p className="text-xs text-text-tertiary mb-1">Dashboard / Workflows</p>
             <h1 className="text-display font-bold text-text-primary tracking-tight">WORKFLOWS</h1>
-            <p className="text-sm text-text-secondary mt-1">18 Kernworkflows &mdash; Operation Playbook</p>
+            <p className="text-sm text-text-secondary mt-1">{totalWorkflows} {totalWorkflows === 1 ? 'Workflow' : 'Kernworkflows'} - Operation Playbook</p>
           </div>
           <div className="flex items-center gap-2">
             <button className="px-4 py-2 rounded-button text-sm font-medium bg-accent-teal text-bg-primary hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>

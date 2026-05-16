@@ -910,7 +910,7 @@ export default function KillSwitchPage() {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <p className="text-[11px] text-text-tertiary">Letzter Kill-Switch-Test</p>
-            <p className="text-xs text-text-secondary">vor 7 Tagen</p>
+            <p className="text-xs text-text-secondary">Noch nicht durchgefuehrt</p>
           </div>
           <button className="px-3 py-1.5 border border-border-default text-text-primary text-xs font-medium rounded-button hover:bg-bg-tertiary transition-colors">
             Testlauf starten

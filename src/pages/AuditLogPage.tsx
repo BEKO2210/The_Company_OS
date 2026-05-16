@@ -157,7 +157,7 @@ export default function AuditLogPage() {
             </h1>
             <p className="text-sm text-text-tertiary mt-1">Dashboard / Audit Log</p>
             <p className="text-sm text-text-secondary mt-2">
-              Unver\u00e4nderliches Aktivit\u00e4tsprotokoll \u2014 Append-Only
+              Unveraenderliches Aktivitaetsprotokoll - Append-Only
             </p>
           </div>
 
@@ -169,7 +169,7 @@ export default function AuditLogPage() {
             className="flex items-center gap-6"
           >
             <div className="text-right">
-              <p className="text-xs text-text-tertiary">Eintr\u00e4ge</p>
+              <p className="text-xs text-text-tertiary">Eintraege</p>
               <p className="text-sm font-mono-data text-text-primary">{totalCount.toLocaleString('de-DE')}</p>
             </div>
             <div className="text-right">
@@ -194,20 +194,20 @@ export default function AuditLogPage() {
         <div className="flex items-center gap-4 flex-wrap">
           <div>
             <p className="text-[10px] font-medium uppercase tracking-widest text-text-tertiary mb-0.5">
-              Ledger Integrit\u00e4t
+              Ledger Integritaet
             </p>
             <p className="text-xs font-mono-data text-accent-teal">
               Hash-Chain: {truncateHash(lastHash)}
             </p>
           </div>
           <div className="text-xs text-text-secondary">
-            Letzter Block: vor 2 Minuten
+            {totalCount > 0 ? `${totalCount.toLocaleString('de-DE')} Blocks` : 'Keine Blocks'}
           </div>
         </div>
         <div className="flex items-center gap-4 flex-wrap">
           <div className="text-right">
-            <p className="text-xs font-mono-data text-text-primary">{totalCount.toLocaleString('de-DE')} Eintr\u00e4ge</p>
-            <p className="text-xs text-text-tertiary">Seit: 01.01.2025</p>
+            <p className="text-xs font-mono-data text-text-primary">{totalCount.toLocaleString('de-DE')} Eintraege</p>
+            <p className="text-xs text-text-tertiary">Append-only Ledger</p>
           </div>
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full badge-green">
             <ShieldCheck className="w-3.5 h-3.5" />
@@ -426,7 +426,7 @@ export default function AuditLogPage() {
                       {/* Tool */}
                       <td className="px-4 py-3 align-top">
                         <span className="text-xs text-text-secondary font-mono-data">
-                          {entry.tool || '\u2014'}
+                          {entry.tool || '-'}
                         </span>
                       </td>
 
@@ -445,7 +445,7 @@ export default function AuditLogPage() {
                         {entry.project ? (
                           <span className="text-xs text-accent-teal font-medium">{entry.project}</span>
                         ) : (
-                          <span className="text-xs text-text-muted">\u2014</span>
+                          <span className="text-xs text-text-muted">-</span>
                         )}
                       </td>
 
@@ -469,7 +469,7 @@ export default function AuditLogPage() {
         {filteredEntries.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16">
             <ScrollText className="w-10 h-10 text-text-muted mb-3" />
-            <p className="text-sm text-text-secondary">Keine Eintr\u00e4ge gefunden</p>
+            <p className="text-sm text-text-secondary">Keine Eintraege gefunden</p>
             <p className="text-xs text-text-tertiary mt-1">Passen Sie die Filter an</p>
           </div>
         )}
@@ -478,11 +478,11 @@ export default function AuditLogPage() {
       {/* Entry count */}
       <div className="mt-4 flex items-center justify-between">
         <p className="text-xs text-text-tertiary">
-          Zeige {filteredEntries.length} von {totalCount} Eintr\u00e4gen
+          Zeige {filteredEntries.length} von {totalCount} Eintraegen
         </p>
         <div className="flex items-center gap-1 text-xs text-text-tertiary">
           <ShieldCheck className="w-3.5 h-3.5 text-status-green" />
-          Integrit\u00e4t verifiziert
+          Integritaet verifiziert
         </div>
       </div>
 
@@ -558,18 +558,18 @@ export default function AuditLogPage() {
                 <div className="p-4 rounded-card border border-border-subtle bg-bg-secondary space-y-3">
                   <div>
                     <p className="text-xs text-text-tertiary uppercase tracking-wider mb-1">Input</p>
-                    <p className="text-sm text-text-primary font-mono-data">{detailEntry.input || '\u2014'}</p>
+                    <p className="text-sm text-text-primary font-mono-data">{detailEntry.input || '-'}</p>
                   </div>
                   <div className="border-t border-border-subtle pt-3">
                     <p className="text-xs text-text-tertiary uppercase tracking-wider mb-1">Output</p>
-                    <p className="text-sm text-text-primary font-mono-data">{detailEntry.output || '\u2014'}</p>
+                    <p className="text-sm text-text-primary font-mono-data">{detailEntry.output || '-'}</p>
                   </div>
                 </div>
 
                 {/* Tool */}
                 <div>
                   <p className="text-xs text-text-tertiary uppercase tracking-wider mb-1">Verwendetes Tool</p>
-                  <p className="text-sm font-mono-data text-text-primary">{detailEntry.tool || '\u2014'}</p>
+                  <p className="text-sm font-mono-data text-text-primary">{detailEntry.tool || '-'}</p>
                 </div>
 
                 {/* Project */}
@@ -635,7 +635,7 @@ export default function AuditLogPage() {
                   onClick={() => setDetailEntry(null)}
                   className="w-full px-4 py-2.5 rounded-button border border-border-default text-text-primary text-sm font-medium hover:bg-bg-elevated transition-colors"
                 >
-                  Schlie\u00dfen
+                  Schliessen
                 </button>
               </div>
             </motion.div>

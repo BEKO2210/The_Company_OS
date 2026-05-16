@@ -759,7 +759,9 @@ export default function ProductStudiosPage() {
               PRODUCT STUDIOS
             </h1>
             <p className="text-sm text-text-tertiary mt-1.5">
-              3 Demo-Studios — Entwicklungsstatus und Lifecycle
+              {productStudios.length === 0
+                ? 'Keine Studios - Lege ein neues Studio an'
+                : `${productStudios.length} ${productStudios.length === 1 ? 'Studio' : 'Studios'} - Entwicklungsstatus und Lifecycle`}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">

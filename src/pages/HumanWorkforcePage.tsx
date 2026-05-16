@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import {
   Users, Star, Search, Filter, UserCheck,
   ChevronRight, Briefcase,
-  Award, TrendingUp, UserCircle
+  Award, UserCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { humanExperts } from '@/data/mockData';
@@ -237,7 +237,9 @@ export default function HumanWorkforcePage() {
 
   const totalNetwork = humanExperts.length;
   const availableNow = humanExperts.filter(e => e.availability === 'available').length;
-  const avgRating = humanExperts.reduce((s, e) => s + e.rating, 0) / humanExperts.length;
+  const avgRating = humanExperts.length > 0
+    ? humanExperts.reduce((s, e) => s + e.rating, 0) / humanExperts.length
+    : 0;
   const activeProjects = humanExperts.reduce((s, e) => s + e.completedProjects, 0);
 
   const inOnboarding = humanExperts.filter(e => e.status === 'onboarding').length;
@@ -336,25 +338,19 @@ export default function HumanWorkforcePage() {
 
         <motion.div {...stagger(2)} className="data-card">
           <div className="text-[11px] font-semibold tracking-wider text-text-tertiary uppercase mb-2">Durchschnittsbewertung</div>
-          <div className="font-mono-data text-2xl font-medium text-accent-teal mb-2">{avgRating.toFixed(1)} / 5.0</div>
-          <div className="flex items-center gap-1 text-[11px] text-status-green mb-2">
-            <TrendingUp className="w-3 h-3" />
-            +0.2 vs. Q1
+          <div className="font-mono-data text-2xl font-medium text-accent-teal mb-2">
+            {humanExperts.length > 0 ? `${avgRating.toFixed(1)} / 5.0` : '- / 5.0'}
           </div>
           <StarRating rating={avgRating} />
         </motion.div>
 
         <motion.div {...stagger(3)} className="data-card">
           <div className="text-[11px] font-semibold tracking-wider text-text-tertiary uppercase mb-2">Onboarding Queue</div>
-          <div className="font-mono-data text-2xl font-medium text-text-primary mb-2">{onboardingPending} / 3</div>
+          <div className="font-mono-data text-2xl font-medium text-text-primary mb-2">{onboardingPending}</div>
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-[11px]">
               <div className="w-1.5 h-1.5 rounded-full bg-status-yellow" />
               <span className="text-status-yellow">{inOnboarding} in Bearbeitung</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-[11px]">
-              <div className="w-1.5 h-1.5 rounded-full bg-text-muted" />
-              <span className="text-text-tertiary">{Math.max(0, 3 - inOnboarding - onboardingPending)} wartend</span>
             </div>
           </div>
         </motion.div>
@@ -602,7 +598,7 @@ export default function HumanWorkforcePage() {
             <div className="text-[11px] text-text-tertiary uppercase">Verfugbar Jetzt</div>
           </div>
           <div className="text-center p-3 bg-bg-tertiary/40 rounded-lg">
-            <div className="font-mono-data text-xl font-medium text-accent-teal mb-1">{avgRating.toFixed(1)}</div>
+            <div className="font-mono-data text-xl font-medium text-accent-teal mb-1">{humanExperts.length > 0 ? avgRating.toFixed(1) : '-'}</div>
             <div className="text-[11px] text-text-tertiary uppercase">Durchschnitt</div>
           </div>
           <div className="text-center p-3 bg-bg-tertiary/40 rounded-lg">
