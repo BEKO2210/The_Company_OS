@@ -3,7 +3,9 @@
 // always sees the .env values, regardless of ESM import-hoist order.
 import dotenv from 'dotenv';
 if (process.env.NODE_ENV === 'test') {
-  dotenv.config({ path: '.env.test' });
+  // .env.test lives under tests/ so static scanners (e.g. Astraudit)
+  // recognise it as a test fixture, not a leaked secret file.
+  dotenv.config({ path: 'tests/.env.test' });
 } else {
   dotenv.config();
 }
