@@ -34,6 +34,11 @@
 ### Finance
 <img src="docs/screenshots/05-finance.png" alt="Finance KPIs aus Budget" width="900" />
 
+<br />
+
+### Adapter-Konfiguration im Wizard
+<img src="docs/screenshots/07-wizard-adapter.png" alt="Adapter Setup im Wizard" width="900" />
+
 </div>
 
 ## Was ist implementiert?
@@ -67,20 +72,24 @@
 - ✅ Recharts Datenvisualisierung
 - ✅ Responsive Design (Desktop/Tablet/Mobile)
 
-## Was ist Mock/Adapter?
+## Was ist Mock / Adapter?
 
-Alle externen Schnittstellen sind als Mock vorbereitet:
+Default ist **alles Mock**. Jeder Adapter unter `server/src/adapters/` erbt von `BaseAdapter` und schaltet automatisch in den Mock-Modus, solange `MOCK_MODE=true` (Default) und keine Credentials gesetzt sind.
 
-| Adapter | Status | Hinweis |
-|---------|--------|---------|
-| EmailAdapter | 🔶 Mock | Keine echten E-Mails |
-| LinkedInAdapter | 🔶 Mock | Keine echten Social-Media-Aktionen |
-| BankingAdapter | 🔶 Mock | Keine echten Zahlungen |
-| AccountingAdapter | 🔶 Mock | Keine echten Buchhaltungs-Aktionen |
-| GitHubAdapter | 🔶 Mock | Keine echten Repos |
-| HostingAdapter | 🔶 Mock | Keine echten Deployments |
-| CalendarAdapter | 🔶 Mock | Keine echten Kalendereintraege |
-| FreelancerPlatformAdapter | 🔶 Mock | Keine echten Freelancer-Anfragen |
+Im **First-Run Setup-Wizard** koennen pro Adapter Provider + Credentials hinterlegt werden. Der Wizard schreibt das Ergebnis via `POST /api/setup/save-env` direkt in `server/.env` (mit Backup `.env.bak`), setzt `MOCK_MODE=false` sobald mindestens ein Adapter aktiv ist und sperrt den Endpoint anschliessend (`SETUP_COMPLETED=true`). Ist das Backend zur Setup-Zeit offline, zeigt der Wizard stattdessen ein Copy-Snippet, das manuell in `server/.env` eingefuegt werden kann.
+
+| Adapter | Default | Provider-Optionen im Wizard |
+|---------|---------|------------------------------|
+| EmailAdapter              | 🔶 Mock | SMTP / SendGrid / Mailgun |
+| LinkedInAdapter           | 🔶 Mock | LinkedIn API / Proxycurl |
+| BankingAdapter            | 🔶 Mock | Plaid / GoCardless / finAPI |
+| AccountingAdapter         | 🔶 Mock | Lexware Office / DATEV / Xero |
+| GitHubAdapter             | 🔶 Mock | Personal Access Token / GitHub App |
+| HostingAdapter            | 🔶 Mock | Vercel / Netlify / Cloudflare Pages |
+| CalendarAdapter           | 🔶 Mock | Google Calendar / CalDAV |
+| FreelancerPlatformAdapter | 🔶 Mock | Upwork / Fiverr / Malt |
+
+Aktivieren = Switch + Provider waehlen + Felder ausfuellen + `Speichern & Anwenden` -> Server neu starten -> Adapter laeuft real.
 
 ## Wie startet man es lokal?
 
