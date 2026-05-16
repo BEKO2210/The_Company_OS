@@ -37,6 +37,12 @@ beforeEach(() => {
       // ignore
     }
   }
+  // Reset AUTOINCREMENT counters so seeded rows get stable IDs each test
+  try {
+    db.prepare("DELETE FROM sqlite_sequence").run();
+  } catch {
+    // table may not exist if no AUTOINCREMENT columns were used yet
+  }
   db.pragma('foreign_keys = ON');
 });
 
