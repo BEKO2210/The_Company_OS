@@ -1,6 +1,6 @@
 # The Company OS
 
-> **Status:** MVP RUN-001 abgeschlossen — 13-Screen Dashboard deployed
+> **Status:** beta testing
 > **Letzte Aktualisierung:** 2026-05-15
 
 ## Was ist das Projekt?
@@ -8,6 +8,7 @@
 **The Company OS** ist das Betriebssystem fuer **"The Company"** — eine AI-native digitale Holding nach deutschem Recht (UG/GmbH). Das System ermoeglicht einem Solo-Gruender, eine vollstaendige Firma mit autonomen Agenten zu betreiben: Planung, Entwicklung, Vertrieb, Support, Qualitaetssicherung, Finanzen und Governance — alles ueber ein zentrales Kontrollzentrum.
 
 ## Live Demo
+### Alle Fehler (UI/UX sind in der aktuellen Version behoben)
 
 🔗 **Dashboard:** [https://56r72ulnxurem.kimi.page](https://56r72ulnxurem.kimi.page)
 
