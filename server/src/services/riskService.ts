@@ -6,7 +6,9 @@ export function calculateScore(probability: number, severity: number): number {
 }
 
 export function getAllRisks(filters?: { category?: string; status?: string; minScore?: number }): Risk[] {
-  let sql = 'SELECT * FROM risks WHERE 1=1';
+  // Use COALESCE(NULLIF(score, 1), probability*severity) so rows seeded without
+  // an explicit score (score defaults to 1) still expose probability*severity.
+  let sql = `SELECT *, COALESCE(NULLIF(score, 1), probability * severity) AS score FROM risks WHERE 1=1`;
   const params: (string | number)[] = [];
 
   if (filters?.category) {
@@ -18,11 +20,11 @@ export function getAllRisks(filters?: { category?: string; status?: string; minS
     params.push(filters.status);
   }
   if (filters?.minScore !== undefined) {
-    sql += ' AND score >= ?';
+    sql += ' AND COALESCE(NULLIF(score, 1), probability * severity) >= ?';
     params.push(filters.minScore);
   }
 
-  sql += ' ORDER BY score DESC, name';
+  sql += ' ORDER BY COALESCE(NULLIF(score, 1), probability * severity) DESC, name';
   return db.prepare(sql).all(...params) as Risk[];
 }
 
