@@ -328,7 +328,10 @@ router.get('/', authMiddleware, asyncHandler(async (_req, res) => {
 router.post('/activate', authMiddleware, requireFounder, asyncHandler(async (req, res) => {
   const { level, reason, confirmationCode } = req.body;
 
-  if (!confirmationCode) {
+  // Only the nuclear level (4) requires the explicit confirmation code.
+  // Lower levels (1-3) are graduated responses and only need founder auth.
+  const effectiveLevel = level || 4;
+  if (effectiveLevel === 4 && !confirmationCode) {
     res.status(400).json({
       success: false,
       error: 'Confirmation code is required. Code: KILL-SWITCH-2025',
@@ -336,7 +339,7 @@ router.post('/activate', authMiddleware, requireFounder, asyncHandler(async (req
     return;
   }
 
-  const result = activate(level || 4, req.user!.email, reason);
+  const result = activate(effectiveLevel, req.user!.email, reason);
 
   if (!result.success) {
     res.status(400).json({ success: false, error: result.error });

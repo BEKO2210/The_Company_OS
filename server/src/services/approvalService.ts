@@ -68,7 +68,7 @@ export function canActOnApproval(approval: Approval, userRole: string): { allowe
   // safety_veto_override, physical_security
   if (RED_LINE_TYPES.includes(approval.type as typeof RED_LINE_TYPES[number])) {
     if (userRole !== ROLES.FOUNDER) {
-      return { allowed: false, reason: `RED LINE VIOLATION: ${approval.type} approvals require FOUNDER role` };
+      return { allowed: false, reason: `Red line violation: ${approval.type} approvals require Founder role` };
     }
   }
 

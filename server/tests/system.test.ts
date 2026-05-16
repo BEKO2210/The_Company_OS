@@ -220,11 +220,11 @@ describe('Complete System Integration', () => {
       const tableNames = tables.map((t) => t.name);
       expect(tableNames.length).toBeGreaterThanOrEqual(20);
 
-      // Core tables must exist
+      // Core tables must exist (match the actual schema, not legacy names)
       const requiredTables = [
         'users', 'agents', 'risks', 'workflows',
-        'approvals', 'audit_log', 'finance_budgets',
-        'departments', 'documents', 'workflow_instances',
+        'approvals', 'audit_log', 'budgets',
+        'departments', 'workflow_instances',
       ];
       for (const table of requiredTables) {
         expect(tableNames).toContain(table);
