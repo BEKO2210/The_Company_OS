@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Brain, Wrench, Wallet, Shield, ChevronDown, ChevronUp
+  Brain, Wrench, Wallet, Shield, ChevronDown, ChevronUp, RotateCcw
 } from 'lucide-react';
 import { systemSettings } from '@/data/mockData';
 import type { SystemSettings } from '@/data/models';
 import { cn } from '@/lib/utils';
+import { resetSetup } from '@/lib/storage';
 
 /* ─── Types ─── */
 type TabId = 'model-policies' | 'tool-permissions' | 'budget-limits' | 'rbac-config';
@@ -58,6 +59,17 @@ export default function SettingsPage() {
             </button>
             <button className="px-4 py-2 rounded-button text-sm font-medium text-text-tertiary hover:text-text-primary hover:bg-bg-tertiary transition-all">
               Zurucksetzen
+            </button>
+            <button
+              onClick={() => {
+                resetSetup();
+                window.location.reload();
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium text-text-tertiary hover:text-text-primary hover:bg-bg-tertiary transition-all"
+              title="Setup-Wizard neu starten"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Setup neu starten
             </button>
           </div>
         </div>

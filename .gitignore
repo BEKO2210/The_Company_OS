@@ -6,3 +6,10 @@ dist
 *.db-wal
 *.log
 .claude/
+
+# Local screenshots from dev/audits (agent-browser)
+empty-home.png
+check-*.png
+wizard-*.png
+after-wizard.png
+*.tmp.png

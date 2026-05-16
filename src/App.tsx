@@ -1,5 +1,7 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import SetupWizard from './components/wizard/SetupWizard';
+import { useFirstRun } from './hooks/useFirstRun';
 import Home from './pages/Home';
 import DepartmentsPage from './pages/DepartmentsPage';
 import AgentRegistryPage from './pages/AgentRegistryPage';
@@ -15,8 +17,10 @@ import SettingsPage from './pages/SettingsPage';
 import KillSwitchPage from './pages/KillSwitchPage';
 
 export default function App() {
+  const { needsSetup, completeSetup } = useFirstRun();
   return (
     <HashRouter>
+      {needsSetup && <SetupWizard onComplete={completeSetup} />}
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
