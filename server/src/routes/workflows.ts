@@ -65,13 +65,33 @@ router.get('/instances/list', authMiddleware, asyncHandler(async (req, res) => {
 }));
 
 // POST /api/workflows/instances/:id/advance (legacy) - WRITE requires admin+
-router.post('/instances/:id/advance', authMiddleware, requireWriteAccess, asyncHandler(async (req, res) => {
+// Also mounted at /api/workflow-instances/:id/advance
+const advanceHandler = asyncHandler(async (req: import('express').Request, res: import('express').Response) => {
   const result = advanceStep(req.params.id as string);
   if (!result.success) {
     res.status(400).json({ success: false, error: result.error });
     return;
   }
-  res.json({ success: true, data: result.instance, blocked: result.blocked });
+  const instance = result.instance as unknown as Record<string, unknown> | undefined;
+  res.json({
+    success: true,
+    data: instance ? { ...instance, current_step: instance.currentStep ?? instance.current_step } : instance,
+    blocked: result.blocked,
+  });
+});
+router.post('/instances/:id/advance', authMiddleware, requireWriteAccess, advanceHandler);
+router.post('/:id/advance', authMiddleware, requireWriteAccess, advanceHandler);
+
+// GET /api/workflow-instances/:id/gate - is current step a blocking gate?
+router.get('/:id/gate', authMiddleware, asyncHandler(async (req, res) => {
+  const instance = engine.getInstance(req.params.id as string);
+  if (!instance) {
+    res.status(404).json({ success: false, error: 'Instance not found' });
+    return;
+  }
+  const stepState = instance.stepStates[instance.currentStep];
+  const blocking = stepState?.state === 'blocked';
+  res.json({ success: true, data: { blocking, currentStep: instance.currentStep, stepState } });
 }));
 
 // ═══════════════════════════════════════════════════════════════
@@ -116,7 +136,14 @@ router.post('/:id/start', authMiddleware, requireWriteAccess, asyncHandler(async
 
   try {
     const instance = await engine.start(workflowId, context);
-    res.status(201).json({ success: true, data: instance });
+    res.status(201).json({
+      success: true,
+      data: {
+        ...instance,
+        workflow_id: instance.workflowId,
+        current_step: instance.currentStep,
+      },
+    });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     res.status(400).json({ success: false, error: message });

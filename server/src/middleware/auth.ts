@@ -32,8 +32,14 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   const token = authHeader.substring(7);
 
   try {
-    const payload = verifyToken<JWTPayload>(token, JWT_SECRET);
-    
+    const payload = verifyToken<JWTPayload & { iat?: number }>(token, JWT_SECRET);
+
+    // Reject tokens issued in the future (clock-skew / forgery defense, 60s tolerance)
+    if (payload.iat && payload.iat > Math.floor(Date.now() / 1000) + 60) {
+      res.status(401).json({ success: false, error: 'Unauthorized: Token issued in the future' });
+      return;
+    }
+
     // Check if user still exists and is active
     const user = db.prepare('SELECT id, email, role, is_active FROM users WHERE id = ?').get(payload.userId) as {
       id: string; email: string; role: string; is_active: number;
