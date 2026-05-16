@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 240" fill="none" role="img" aria-label="The Company OS">
+  <title>The Company OS</title>
+
+  <!-- ─── Hexagon glyph (matches lucide Hexagon, accent-teal) ─── -->
+  <g transform="translate(40, 56)">
+    <!-- soft outer glow -->
+    <path d="M64 0 L124 32 L124 96 L64 128 L4 96 L4 32 Z"
+          fill="#2DD4BF" fill-opacity="0.06"/>
+    <!-- outer hexagon -->
+    <path d="M64 0 L124 32 L124 96 L64 128 L4 96 L4 32 Z"
+          fill="none" stroke="#2DD4BF" stroke-width="3" stroke-linejoin="round"/>
+    <!-- inner hexagon -->
+    <path d="M64 26 L100 46 L100 82 L64 102 L28 82 L28 46 Z"
+          fill="#2DD4BF" fill-opacity="0.14"
+          stroke="#2DD4BF" stroke-width="1.5" stroke-linejoin="round"/>
+    <!-- center dot -->
+    <circle cx="64" cy="64" r="6" fill="#2DD4BF"/>
+  </g>
+
+  <!-- ─── Wordmark (dark variant uses light text) ─── -->
+  <g font-family="Inter, system-ui, -apple-system, 'Segoe UI', sans-serif">
+    <text x="220" y="116"
+          font-size="64" font-weight="700"
+          fill="#F0F0F5" letter-spacing="-1.5">
+      THE COMPANY OS
+    </text>
+    <text x="222" y="164"
+          font-size="20" font-weight="500"
+          fill="#2DD4BF" letter-spacing="7">
+      AI-NATIVE OPERATING SYSTEM
+    </text>
+  </g>
+</svg>

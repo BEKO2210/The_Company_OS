@@ -1,26 +1,42 @@
-# The Company OS
+<div align="center">
 
-<p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/BEKO2210/The_Company_OS?color=2DD4BF&style=flat-square" alt="License: MIT" /></a>
-  <a href="https://github.com/BEKO2210/The_Company_OS/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/BEKO2210/The_Company_OS/ci.yml?branch=main&label=CI&style=flat-square" alt="CI" /></a>
-  <a href="https://github.com/BEKO2210/The_Company_OS/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/BEKO2210/The_Company_OS/codeql.yml?branch=main&label=CodeQL&style=flat-square" alt="CodeQL" /></a>
-  <img src="https://img.shields.io/github/last-commit/BEKO2210/The_Company_OS?style=flat-square" alt="Last commit" />
-  <img src="https://img.shields.io/github/v/release/BEKO2210/The_Company_OS?display_name=tag&include_prereleases&sort=semver&style=flat-square" alt="Release" />
-  <img src="https://img.shields.io/badge/node-%E2%89%A520-3B82F6?style=flat-square&logo=node.js&logoColor=white" alt="Node 20+" />
-  <img src="https://img.shields.io/badge/typescript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict" />
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/brand/logo-light.svg">
+  <img alt="The Company OS" src="docs/brand/logo-dark.svg" width="640">
+</picture>
 
-> **Status:** Alpha (v0.1.0)
-> **Letzte Aktualisierung:** 2026-05-16
+<br />
+
+**AI-natives Betriebssystem fuer eine digitale Holding**
+<br />
+*Solo-Gruender · vollstaendige Firma mit autonomen Agenten · Planung, Entwicklung, Vertrieb, QA, Finanzen, Governance — ueber ein Kontrollzentrum.*
+
+<br />
+
+<a href="LICENSE"><img src="https://img.shields.io/github/license/BEKO2210/The_Company_OS?color=2DD4BF&style=flat-square" alt="License: MIT" /></a>
+<a href="https://github.com/BEKO2210/The_Company_OS/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/BEKO2210/The_Company_OS/ci.yml?branch=main&label=CI&style=flat-square" alt="CI" /></a>
+<a href="https://github.com/BEKO2210/The_Company_OS/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/BEKO2210/The_Company_OS/codeql.yml?branch=main&label=CodeQL&style=flat-square" alt="CodeQL" /></a>
+<img src="https://img.shields.io/github/last-commit/BEKO2210/The_Company_OS?style=flat-square" alt="Last commit" />
+<img src="https://img.shields.io/github/v/release/BEKO2210/The_Company_OS?display_name=tag&include_prereleases&sort=semver&style=flat-square" alt="Release" />
+<img src="https://img.shields.io/badge/node-%E2%89%A520-3B82F6?style=flat-square&logo=node.js&logoColor=white" alt="Node 20+" />
+<img src="https://img.shields.io/badge/typescript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict" />
+
+<br /><br />
+
+<sub><strong>Status</strong> · Alpha (v0.1.0) &nbsp;·&nbsp; <strong>Letzte Aktualisierung</strong> · 2026-05-16</sub>
+
+<br /><br />
+
+🔗 **Live Demo:** <a href="https://56r72ulnxurem.kimi.page">56r72ulnxurem.kimi.page</a>
+
+</div>
+
+---
 
 ## Was ist das Projekt?
 
 **The Company OS** ist das Betriebssystem fuer **"The Company"** — eine AI-native digitale Holding nach deutschem Recht (UG/GmbH). Das System ermoeglicht einem Solo-Gruender, eine vollstaendige Firma mit autonomen Agenten zu betreiben: Planung, Entwicklung, Vertrieb, Support, Qualitaetssicherung, Finanzen und Governance — alles ueber ein zentrales Kontrollzentrum.
-
-## Live Demo
-### Alle Fehler (UI/UX sind in der aktuellen Version behoben)
-
-🔗 **Dashboard:** [https://56r72ulnxurem.kimi.page](https://56r72ulnxurem.kimi.page)
 
 ## Screenshots
 
