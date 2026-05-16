@@ -6,13 +6,13 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  type CompanyConfig, DEFAULT_CONFIG, getCompanyConfig, saveCompanyConfig,
+  type CompanyConfig, DEFAULT_CONFIG, getCompanyConfig,
 } from '@/lib/storage';
 
 const easeOut = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
 interface Props {
-  onComplete: () => void;
+  onComplete: (cfg?: CompanyConfig) => void;
 }
 
 type StepKey = 'welcome' | 'company' | 'departments' | 'agents' | 'unit' | 'budget' | 'policy' | 'done';
@@ -394,13 +394,11 @@ export default function SetupWizard({ onComplete }: Props) {
   }, [current.key, cfg]);
 
   const finish = () => {
-    saveCompanyConfig(cfg);
-    onComplete();
+    onComplete({ ...cfg, createdAt: cfg.createdAt || new Date().toISOString() });
   };
 
   const skipAll = () => {
-    saveCompanyConfig({ ...cfg, createdAt: new Date().toISOString() });
-    onComplete();
+    onComplete({ ...cfg, createdAt: cfg.createdAt || new Date().toISOString() });
   };
 
   return (

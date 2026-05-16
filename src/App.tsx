@@ -2,6 +2,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import SetupWizard from './components/wizard/SetupWizard';
 import { useFirstRun } from './hooks/useFirstRun';
+import { CompanyProvider, useCompanyConfig } from './contexts/CompanyContext';
 import Home from './pages/Home';
 import DepartmentsPage from './pages/DepartmentsPage';
 import AgentRegistryPage from './pages/AgentRegistryPage';
@@ -16,11 +17,19 @@ import WorkflowsPage from './pages/WorkflowsPage';
 import SettingsPage from './pages/SettingsPage';
 import KillSwitchPage from './pages/KillSwitchPage';
 
-export default function App() {
+function AppShell() {
   const { needsSetup, completeSetup } = useFirstRun();
+  const { save } = useCompanyConfig();
   return (
     <HashRouter>
-      {needsSetup && <SetupWizard onComplete={completeSetup} />}
+      {needsSetup && (
+        <SetupWizard
+          onComplete={(cfg) => {
+            if (cfg) save(cfg);
+            completeSetup();
+          }}
+        />
+      )}
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -39,5 +48,13 @@ export default function App() {
         </Routes>
       </Layout>
     </HashRouter>
+  );
+}
+
+export default function App() {
+  return (
+    <CompanyProvider>
+      <AppShell />
+    </CompanyProvider>
   );
 }

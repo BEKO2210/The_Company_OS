@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { financeEntries, invoices, budgets, liquidityTrend } from '@/data/mockData';
 import type { Invoice } from '@/data/models';
 import { PredictionChart } from '@/components/ai';
+import { useCompanyConfig } from '@/contexts/CompanyContext';
 
 /* ─── helpers ─── */
 const eur = (n: number) =>
@@ -93,6 +94,10 @@ function BudgetCard({ budget, index }: { budget: typeof budgets[0]; index: numbe
 
 /* ─── Main Page ─── */
 export default function FinancePage() {
+  const { config } = useCompanyConfig();
+  const monthlyBudget = config.budget.monthly;
+  const liquidityTarget = config.budget.liquidityTarget;
+
   const [invoiceFilter, setInvoiceFilter] = useState<string>('all');
 
   /* Summary calculations */
@@ -102,7 +107,7 @@ export default function FinancePage() {
 
   const donutData = useMemo(() => [] as { name: string; value: number; color: string }[], []);
 
-  const breakEvenTarget = 0;
+  const breakEvenTarget = config.budget.breakEvenTarget;
   const currentMRR = 0;
   const breakEvenProgress = breakEvenTarget > 0 ? Math.min((currentMRR / breakEvenTarget) * 100, 100) : 0;
 
@@ -157,7 +162,9 @@ export default function FinancePage() {
           <div className="font-mono-data text-2xl font-medium text-text-primary mb-1">
             {eur(0)}
           </div>
-          <div className="text-[11px] text-text-tertiary">Keine Daten</div>
+          <div className="text-[11px] text-text-tertiary">
+            {liquidityTarget > 0 ? `Ziel: ${eur(liquidityTarget)}` : 'Kein Ziel definiert'}
+          </div>
         </motion.div>
 
         {/* Monatsbudget */}
@@ -166,12 +173,14 @@ export default function FinancePage() {
             <span className="text-[11px] font-semibold tracking-wider text-text-tertiary uppercase">Monatsbudget</span>
           </div>
           <div className="font-mono-data text-lg font-medium text-text-primary mb-1">
-            {eur(0)} / {eur(0)}
+            {eur(0)} / {eur(monthlyBudget)}
           </div>
           <div className="h-1.5 bg-bg-tertiary rounded-full overflow-hidden mb-2">
             <div className="h-full w-0 bg-text-muted rounded-full" />
           </div>
-          <div className="text-[11px] text-text-tertiary">Kein Budget definiert</div>
+          <div className="text-[11px] text-text-tertiary">
+            {monthlyBudget > 0 ? `${eur(monthlyBudget)} verfuegbar` : 'Kein Budget definiert'}
+          </div>
         </motion.div>
 
         {/* Offene Rechnungen */}
@@ -195,7 +204,7 @@ export default function FinancePage() {
             <span className="text-[11px] font-semibold tracking-wider text-text-tertiary uppercase">Break-Even</span>
           </div>
           <div className="font-mono-data text-lg font-medium text-text-primary mb-1">
-            {eur(0)}/Monat
+            {eur(breakEvenTarget)}/Monat
           </div>
           <div className="text-xs text-text-secondary mb-1">{eur(0)} MRR aktuell</div>
           <div className="flex items-center gap-2">

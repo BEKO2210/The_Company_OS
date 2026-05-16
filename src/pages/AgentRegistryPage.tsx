@@ -16,8 +16,9 @@ import {
   Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { agents } from '@/data/mockData';
 import type { Agent } from '@/data/models';
+import { useCompanyConfig } from '@/contexts/CompanyContext';
+import { deriveAgents } from '@/lib/companyAdapter';
 
 /* ─── Status Helpers ─── */
 const statusConfig: Record<string, { label: string; dotClass: string; badgeClass: string }> = {
@@ -59,7 +60,7 @@ const roleBadgeClass: Record<string, string> = {
 const statusOptions = ['all', 'active', 'paused', 'quarantine', 'offline'] as const;
 const riskOptions = ['all', 'critical', 'high', 'medium', 'low'] as const;
 
-const departmentOptions = ['all', ...new Set(agents.map((a) => a.department))] as const;
+// departmentOptions is computed inside the component from live config
 
 /* ─── Avatar Initials ─── */
 function getInitials(name: string): string {
@@ -438,9 +439,16 @@ function AgentDetailDrawer({
 }
 
 export default function AgentRegistryPage() {
+  const { config } = useCompanyConfig();
+  const agents = useMemo(() => deriveAgents(config), [config]);
+  const departmentOptions = useMemo<string[]>(
+    () => ['all', ...Array.from(new Set(agents.map((a) => a.department)))],
+    [agents],
+  );
+
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<typeof statusOptions[number]>('all');
-  const [deptFilter, setDeptFilter] = useState<typeof departmentOptions[number]>('all');
+  const [deptFilter, setDeptFilter] = useState<string>('all');
   const [riskFilter, setRiskFilter] = useState<typeof riskOptions[number]>('all');
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
@@ -476,7 +484,7 @@ export default function AgentRegistryPage() {
     }
 
     return list;
-  }, [search, statusFilter, deptFilter, riskFilter]);
+  }, [agents, search, statusFilter, deptFilter, riskFilter]);
 
   const activeCount = agents.filter((a) => a.status === 'active').length;
   const pausedCount = agents.filter((a) => a.status === 'paused').length;

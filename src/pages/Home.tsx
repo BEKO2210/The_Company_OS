@@ -10,11 +10,14 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, LineChart, Line,
 } from 'recharts';
+import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import {
-  departments, approvals, auditLog, liquidityTrend, automationTrend,
+  approvals, auditLog, liquidityTrend, automationTrend,
 } from '@/data';
 import { AIInsights } from '@/components/ai';
+import { useCompanyConfig } from '@/contexts/CompanyContext';
+import { deriveDepartments } from '@/lib/companyAdapter';
 
 const easeOut = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -120,6 +123,8 @@ function CircularGauge({ value, size = 120 }: { value: number; size?: number }) 
 // ─── Main Component ───
 export default function Home() {
   const navigate = useNavigate();
+  const { config } = useCompanyConfig();
+  const departments = useMemo(() => deriveDepartments(config), [config]);
 
   return (
     <div className="max-w-container mx-auto space-y-4">

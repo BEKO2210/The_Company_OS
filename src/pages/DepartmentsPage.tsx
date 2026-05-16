@@ -14,8 +14,9 @@ import {
   Minus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { departments, agents } from '@/data/mockData';
 import type { Department } from '@/data/models';
+import { useCompanyConfig } from '@/contexts/CompanyContext';
+import { deriveAgents, deriveDepartments } from '@/lib/companyAdapter';
 
 /* ─── Status Helpers ─── */
 function getDepartmentHealth(dept: Department): 'healthy' | 'warning' | 'critical' {
@@ -74,9 +75,8 @@ const priorityBadgeClass: Record<string, string> = {
   low: 'badge-gray',
 };
 
-function getAgentName(id: string) {
-  const a = agents.find((ag) => ag.id === id);
-  return a ? a.name : id;
+function makeGetAgentName(agentList: { id: string; name: string }[]) {
+  return (id: string) => agentList.find((ag) => ag.id === id)?.name ?? id;
 }
 
 /* ─── Sorting ─── */
@@ -106,6 +106,11 @@ const cardVariants = {
 };
 
 export default function DepartmentsPage() {
+  const { config } = useCompanyConfig();
+  const agents = useMemo(() => deriveAgents(config), [config]);
+  const departments = useMemo(() => deriveDepartments(config), [config]);
+  const getAgentName = useMemo(() => makeGetAgentName(agents), [agents]);
+
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [statusFilter, setStatusFilter] = useState<'all' | 'healthy' | 'warning' | 'critical'>('all');
@@ -151,7 +156,7 @@ export default function DepartmentsPage() {
     });
 
     return list;
-  }, [search, sortKey, statusFilter]);
+  }, [departments, search, sortKey, statusFilter, getAgentName]);
 
   const totalAgents = departments.reduce((sum, d) => sum + d.agents.length, 0);
   const selectedSortLabel = sortOptions.find((o) => o.key === sortKey)?.label ?? 'Name';

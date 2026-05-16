@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AIQueryPanel } from '@/components/ai';
+import { useCompanyConfig } from '@/contexts/CompanyContext';
+import { founderInitials } from '@/lib/companyAdapter';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -45,6 +47,10 @@ interface SidebarProps {
 export default function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { config } = useCompanyConfig();
+  const founderName = config.founderName || 'Founder';
+  const founderRole = config.founderRole || 'CEO';
+  const initials = founderInitials(config.founderName);
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -187,7 +193,7 @@ export default function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
           )}
         >
           <div className="w-7 h-7 rounded-full bg-accent-teal/15 border border-accent-teal/40 flex items-center justify-center flex-shrink-0">
-            <span className="text-[10px] font-semibold text-accent-teal">F</span>
+            <span className="text-[10px] font-semibold text-accent-teal">{initials}</span>
           </div>
           <AnimatePresence>
             {!collapsed && (
@@ -198,8 +204,8 @@ export default function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <p className="text-xs font-medium text-text-primary truncate">Founder</p>
-                <p className="text-[10px] text-text-tertiary truncate">CEO</p>
+                <p className="text-xs font-medium text-text-primary truncate">{founderName}</p>
+                <p className="text-[10px] text-text-tertiary truncate">{founderRole}</p>
               </motion.div>
             )}
           </AnimatePresence>

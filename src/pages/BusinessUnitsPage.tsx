@@ -15,8 +15,9 @@ import {
   Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { businessUnits } from '@/data/mockData';
 import type { BusinessUnit } from '@/data/models';
+import { useCompanyConfig } from '@/contexts/CompanyContext';
+import { deriveBusinessUnits } from '@/lib/companyAdapter';
 
 /* ── status helpers ── */
 function statusConfig(status: BusinessUnit['status']) {
@@ -329,6 +330,9 @@ function DetailDrawer({ unit, onClose }: { unit: BusinessUnit; onClose: () => vo
 
 /* ── Main Page ── */
 export default function BusinessUnitsPage() {
+  const { config } = useCompanyConfig();
+  const businessUnits = useMemo(() => deriveBusinessUnits(config), [config]);
+
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -359,7 +363,7 @@ export default function BusinessUnitsPage() {
       }
       return true;
     });
-  }, [statusFilter, riskFilter, searchQuery]);
+  }, [businessUnits, statusFilter, riskFilter, searchQuery]);
 
   return (
     <motion.div
